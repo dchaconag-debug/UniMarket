@@ -4,11 +4,12 @@ previews:
 services:
   - type: web
     name: unimarket-main
-    runtime: docker
-    branch: main
+    runtime: image
+    image:
+      url: ghcr.io/nauj2024/unimarket:main
     plan: free
     region: virginia
-    autoDeployTrigger: commit
+    autoDeployTrigger: "off"
     healthCheckPath: /login
     envVars:
       - key: SPRING_PROFILES_ACTIVE
