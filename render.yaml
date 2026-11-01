@@ -1,0 +1,15 @@
+previews:
+  generation: "off"
+
+services:
+  - type: web
+    name: unimarket-main
+    runtime: docker
+    branch: main
+    plan: free
+    region: virginia
+    autoDeployTrigger: commit
+    healthCheckPath: /login
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: render

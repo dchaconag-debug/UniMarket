@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.ActiveProfiles;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -20,6 +21,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
         "spring.security.oauth2.client.registration.google.scope=openid,email,profile"
 })
 @AutoConfigureMockMvc
+@ActiveProfiles("render")
 class GoogleLoginTests {
 
     @Autowired
@@ -47,6 +49,17 @@ class GoogleLoginTests {
                 .andExpect(header().string("Location", containsString("client_id=test-client")))
                 .andExpect(header().string("Location", containsString("redirect_uri=http://localhost/login/oauth2/code/google")))
                 .andExpect(header().string("Location", containsString("openid")));
+    }
+
+    @Test
+    void renderProxyProducesHttpsGoogleCallback() throws Exception {
+        mvc.perform(get("/oauth2/authorization/google")
+                        .header("X-Forwarded-Proto", "https")
+                        .header("X-Forwarded-Host", "unimarket-main.onrender.com")
+                        .header("X-Forwarded-Port", "443"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(header().string("Location", containsString(
+                        "redirect_uri=https://unimarket-main.onrender.com/login/oauth2/code/google")));
     }
 
     @Test
