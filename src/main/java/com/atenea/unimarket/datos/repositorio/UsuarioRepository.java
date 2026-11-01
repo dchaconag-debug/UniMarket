@@ -9,4 +9,6 @@ import com.atenea.unimarket.datos.modelo.Usuario;
 public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
     Optional<Usuario> findByGoogleSub(String googleSub);
+
+    boolean existsByGoogleSub(String googleSub);
 }

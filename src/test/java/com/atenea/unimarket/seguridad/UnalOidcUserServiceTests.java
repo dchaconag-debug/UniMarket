@@ -3,7 +3,6 @@ package com.atenea.unimarket.seguridad;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -16,37 +15,17 @@ import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
-import com.atenea.unimarket.negocio.UsuarioService;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class UnalOidcUserServiceTests {
-
-    private final UsuarioService usuarios = mock(UsuarioService.class);
 
     @Test
     void acceptsVerifiedUnalAccount() {
         OidcUser user = user("estudiante@unal.edu.co", true, "unal.edu.co");
         assertThat(load(user)).isSameAs(user);
-        verify(usuarios).registrarSiNoExiste("google-user-123", "Estudiante UNAL", "estudiante@unal.edu.co");
-    }
-
-    @Test
-    void storesEmailInLowercaseRegardlessOfServerLocale() {
-        Locale original = Locale.getDefault();
-        Locale.setDefault(Locale.forLanguageTag("tr-TR"));
-        try {
-            load(user("ISABEL@unal.edu.co", true, "unal.edu.co"));
-        } finally {
-            Locale.setDefault(original);
-        }
-        verify(usuarios).registrarSiNoExiste("google-user-123", "Estudiante UNAL", "isabel@unal.edu.co");
     }
 
     @ParameterizedTest
@@ -67,7 +46,6 @@ class UnalOidcUserServiceTests {
                 .isInstanceOf(OAuth2AuthenticationException.class)
                 .satisfies(exception -> assertThat(((OAuth2AuthenticationException) exception)
                         .getError().getErrorCode()).isEqualTo("unal_account_required"));
-        verify(usuarios, never()).registrarSiNoExiste(any(), any(), any());
     }
 
     private OidcUser load(OidcUser user) {
@@ -75,13 +53,12 @@ class UnalOidcUserServiceTests {
         OAuth2UserService<OidcUserRequest, OidcUser> delegate = mock(OAuth2UserService.class);
         OidcUserRequest request = mock(OidcUserRequest.class);
         when(delegate.loadUser(request)).thenReturn(user);
-        return new UnalOidcUserService(delegate, usuarios).loadUser(request);
+        return new UnalOidcUserService(delegate).loadUser(request);
     }
 
     private OidcUser user(String email, Boolean verified, String domain) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("sub", "google-user-123");
-        claims.put("name", "Estudiante UNAL");
         if (email != null) claims.put("email", email);
         if (verified != null) claims.put("email_verified", verified);
         if (domain != null) claims.put("hd", domain);

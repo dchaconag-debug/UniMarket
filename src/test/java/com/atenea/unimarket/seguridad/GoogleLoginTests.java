@@ -8,6 +8,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -63,12 +64,13 @@ class GoogleLoginTests {
     }
 
     @Test
-    void authenticatedHomeEscapesProfileValues() throws Exception {
-        mvc.perform(get("/").with(oidcLogin().idToken(token -> token
+    void profileFormEscapesGoogleValues() throws Exception {
+        mvc.perform(get("/perfil/nuevo").with(oidcLogin().idToken(token -> token
                         .claim("name", "<script>alert(1)</script>")
                         .claim("email", "estudiante@unal.edu.co"))))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("&lt;script&gt;")))
+                .andExpect(content().string(not(containsString("<script>alert(1)"))))
                 .andExpect(content().string(containsString("estudiante@unal.edu.co")));
     }
 

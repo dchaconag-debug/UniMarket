@@ -58,19 +58,19 @@ Historias: `OFERTA-OFE-H01` publicar; `OFERTA-OFE-H02` actualizar; `OFERTA-OFE-H
 
 Actor: persona de la comunidad universitaria. E2 pp. 9-10, 27-28; E3 pp. 3-4.
 
-El inicio de sesión con Google es el único medio de autenticación y acredita la pertenencia institucional. Solo se admiten cuentas con correo verificado del dominio `unal.edu.co`. Toda cuenta registrada queda verificada, por lo que no hay códigos por correo o SMS, contraseñas ni intentos de verificación que registrar. La cuenta se crea en el primer inicio de sesión con el nombre y correo que entrega Google y se identifica por el identificador de cuenta de Google, no por el correo.
+El inicio de sesión con Google es el único medio de autenticación y acredita la pertenencia institucional. Solo se admiten cuentas con correo verificado del dominio `unal.edu.co`. Toda cuenta registrada queda verificada, por lo que no hay códigos por correo o SMS, contraseñas ni intentos de verificación que registrar. Iniciar sesión no crea la cuenta. Mientras la identidad de Google no tenga perfil, toda página redirige al formulario de [CU-04](#cu-04-crear-y-actualizar-perfil); al guardarlo se crean juntos el usuario y su perfil. La cuenta se identifica por el identificador de cuenta de Google, no por el correo.
 
 Esta decisión reemplaza el flujo de códigos de E2 y E3 y sus historias `VERIFICACION-USR-H01` y `VERIFICACION-USR-H02`.
 
 ## CU-04: crear y actualizar perfil
 
-Actor: usuario con cuenta. E2 pp. 12-13, 28-29.
+Actor: persona autenticada con Google. E2 pp. 12-13, 28-29.
 
-El formulario incluye un campo carrera, semestre, avance, intereses, experiencia, especialidad, teléfono de contacto y horarios de disponibilidad. Crear el registro si es la primera vez; de lo contrario, precargar los datos actuales. Validar los datos, impedir campos obligatorios vacíos y rechazar formatos inválidos, incluido el teléfono. Confirmar el guardado, registrar su fecha y reflejar los cambios donde se muestra el perfil.
+El formulario muestra el correo institucional de Google sin permitir editarlo y el nombre de Google como valor inicial editable. Incluye además carrera, semestre, avance, intereses, experiencia, especialidad, teléfono de contacto y horarios de disponibilidad. Completar el perfil es obligatorio para usar la plataforma y crea la cuenta. Al editar un perfil existente, precargar los datos actuales. Validar los datos, impedir campos obligatorios vacíos y rechazar formatos inválidos, incluido el teléfono. Confirmar el guardado, registrar su fecha y reflejar los cambios donde se muestra el perfil.
 
 Si el usuario cambia disponibilidad con un servicio activo cuyo horario ya fue acordado, advertir antes de actualizar. Aplicar el cambio a futuras negociaciones y conservar los horarios ya pactados.
 
-Los horarios de disponibilidad son franjas semanales de día, hora de inicio y hora de fin; su formato de almacenamiento está en [persistencia](diseno.md#persistencia). Falta definir la lista exacta de campos obligatorios.
+Los horarios de disponibilidad son franjas semanales de día, hora de inicio y hora de fin; su formato de almacenamiento está en [persistencia](diseno.md#persistencia). El teléfono de contacto es obligatorio y debe ser un celular colombiano de 10 dígitos que empiece por 3, con prefijo `+57` opcional; se guarda sin prefijo. Los horarios son opcionales. Falta definir cuáles de los campos académicos y de servicios serán obligatorios.
 
 Historias: `PERFIL-USR-H01` completar por primera vez; `PERFIL-USR-H02` mantener actualizado.
 
