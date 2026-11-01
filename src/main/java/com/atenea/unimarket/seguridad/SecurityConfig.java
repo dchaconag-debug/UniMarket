@@ -9,12 +9,14 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
+import com.atenea.unimarket.negocio.UsuarioService;
+
 @Configuration
 public class SecurityConfig {
 
     @Bean
-    UnalOidcUserService unalOidcUserService() {
-        return new UnalOidcUserService(new OidcUserService());
+    UnalOidcUserService unalOidcUserService(UsuarioService usuarios) {
+        return new UnalOidcUserService(new OidcUserService(), usuarios);
     }
 
     @Bean

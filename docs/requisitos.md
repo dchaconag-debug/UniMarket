@@ -12,7 +12,7 @@ CU-01 y CU-02 son los casos de mayor prioridad en E3 p. 3. Los otros cinco casos
 
 ## CU-01: comprar / negociar servicio
 
-Actor principal: cliente. Requiere perfiles de cliente y ofertador y un servicio publicado. CU-03 habilita la compra tras la verificación. Fuentes: E2 pp. 3-4, 25-26; E3 pp. 2, 5-6, 10.
+Actor principal: cliente. Requiere perfiles de cliente y ofertador y un servicio publicado. Fuentes: E2 pp. 3-4, 25-26; E3 pp. 2, 5-6, 10.
 
 1. El cliente consulta la tarifa por hora y la intensidad horaria de la oferta.
 2. Inicia una solicitud aceptando las condiciones publicadas o proponiendo otra tarifa. El cliente no modifica la intensidad horaria.
@@ -42,13 +42,12 @@ Historias de E2 pp. 25-26: `COMPRA-CLI-H01` contratar condiciones publicadas; `H
 
 ## CU-02: ofertar y editar servicio
 
-Actor principal: ofertador con perfil verificado institucionalmente. E2 pp. 6-7, 26-27; E3 pp. 3, 7-8, 11.
+Actor principal: ofertador. E2 pp. 6-7, 26-27; E3 pp. 3, 7-8, 11.
 
 - Campos obligatorios: categoría, descripción, tarifa por hora e intensidad horaria.
 - Campos opcionales: experiencia, especialidad y horarios de disponibilidad.
 - Validar antes de publicar. Una tarifa menor o igual a cero es inválida. Falta definir moneda y límites de intensidad horaria.
 - Crear el servicio en `DISPONIBLE`, vincularlo al ofertador y a su categoría, mostrarlo en catálogo y confirmar la publicación.
-- Bloquear publicación y dirigir a verificación si el perfil no está verificado institucionalmente. El mecanismo de acreditación está en [CU-03](#cu-03-verificar-perfil).
 - Para editar un servicio propio, cargar sus valores actuales y aplicar las validaciones de publicación.
 - Si hay una negociación o transacción en curso, bloquear cambios a tarifa e intensidad; permitir modificar los demás campos. Esto no impide contrapropuestas dentro de la negociación.
 - Si una nueva publicación es muy similar a otra del mismo ofertador, advertir y permitir continuar o editar la existente. La advertencia no prohíbe duplicados. Falta definir el criterio de similitud.
@@ -57,16 +56,11 @@ Historias: `OFERTA-OFE-H01` publicar; `OFERTA-OFE-H02` actualizar; `OFERTA-OFE-H
 
 ## CU-03: verificar perfil
 
-Actor: usuario con cuenta aún no verificada. E2 pp. 9-10, 27-28; E3 pp. 3-4.
+Actor: persona de la comunidad universitaria. E2 pp. 9-10, 27-28; E3 pp. 3-4.
 
-1. El usuario ingresa correo institucional o teléfono.
-2. El sistema envía un código al medio ingresado.
-3. Solo un código correcto y vigente permite completar la verificación del medio. Para publicar, el perfil debe cumplir además la condición de verificación institucional.
-4. Registrar todos los intentos, tanto exitosos como fallidos.
+El inicio de sesión con Google es el único medio de autenticación y acredita la pertenencia institucional. Solo se admiten cuentas con correo verificado del dominio `unal.edu.co`. Toda cuenta registrada queda verificada, por lo que no hay códigos por correo o SMS, contraseñas ni intentos de verificación que registrar. La cuenta se crea en el primer inicio de sesión con el nombre y correo que entrega Google y se identifica por el identificador de cuenta de Google, no por el correo.
 
-El correo debe pertenecer al dominio institucional. Se admite teléfono como medio de contacto y correo o SMS como canales de envío. La publicación requiere acreditar pertenencia institucional; verificar un teléfono por sí solo no acredita esa pertenencia. El código expira en cinco minutos. Se permiten tres intentos y luego se bloquean temporalmente nuevos intentos para ese medio. El usuario puede solicitar otro código si expiró. Falta definir los dominios admitidos, cómo acreditar pertenencia institucional cuando se usa SMS, duración del bloqueo, límites de reenvío y reinicio del contador. También falta precisar la relación entre verificación e inicio de sesión; el esquema incluye `password_hash`, pero el flujo de autenticación no está detallado.
-
-Historias: `VERIFICACION-USR-H01` verificar mediante código; `VERIFICACION-USR-H02` recuperar verificación fallida.
+Esta decisión reemplaza el flujo de códigos de E2 y E3 y sus historias `VERIFICACION-USR-H01` y `VERIFICACION-USR-H02`.
 
 ## CU-04: crear y actualizar perfil
 
@@ -76,7 +70,7 @@ El formulario incluye un campo carrera, semestre, avance, intereses, experiencia
 
 Si el usuario cambia disponibilidad con un servicio activo cuyo horario ya fue acordado, advertir antes de actualizar. Aplicar el cambio a futuras negociaciones y conservar los horarios ya pactados.
 
-Falta definir la lista exacta de campos obligatorios y el formato de los horarios de disponibilidad.
+Los horarios de disponibilidad son franjas semanales de día, hora de inicio y hora de fin; su formato de almacenamiento está en [persistencia](diseno.md#persistencia). Falta definir la lista exacta de campos obligatorios.
 
 Historias: `PERFIL-USR-H01` completar por primera vez; `PERFIL-USR-H02` mantener actualizado.
 
