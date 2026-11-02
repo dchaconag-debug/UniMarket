@@ -60,44 +60,7 @@
             </p>
         </fieldset>
 
-        <fieldset>
-            <legend>Horarios de disponibilidad</legend>
-            <p>Agrega las franjas semanales en las que puedes ofrecer o recibir servicios. Son opcionales; usa «Agregar franja» para añadir una.</p>
-
-            <fieldset th:each="franja, i : *{franjas}">
-                <legend th:text="|Franja ${i.count}|">Franja 1</legend>
-                <p>
-                    <label th:for="|franjas${i.index}.dia|">Día</label>
-                    <select th:field="*{franjas[__${i.index}__].dia}"
-                            th:attr="aria-invalid=${#fields.hasErrors('franjas[__${i.index}__].dia')}">
-                        <option value="">Selecciona un día</option>
-                        <option th:each="dia : ${dias}" th:value="${dia}" th:text="${dia.nombre}">Lunes</option>
-                    </select>
-                    <strong th:if="${#fields.hasErrors('franjas[__${i.index}__].dia')}"
-                            th:errors="*{franjas[__${i.index}__].dia}">Error</strong>
-                </p>
-                <p>
-                    <label th:for="|franjas${i.index}.inicio|">Desde</label>
-                    <input type="time" th:field="*{franjas[__${i.index}__].inicio}"
-                           th:attr="aria-invalid=${#fields.hasErrors('franjas[__${i.index}__].inicio')}">
-                    <strong th:if="${#fields.hasErrors('franjas[__${i.index}__].inicio')}"
-                            th:errors="*{franjas[__${i.index}__].inicio}">Error</strong>
-                </p>
-                <p>
-                    <label th:for="|franjas${i.index}.fin|">Hasta</label>
-                    <input type="time" th:field="*{franjas[__${i.index}__].fin}"
-                           th:attr="aria-invalid=${#fields.hasErrors('franjas[__${i.index}__].fin')}">
-                    <strong th:if="${#fields.hasErrors('franjas[__${i.index}__].fin')}"
-                            th:errors="*{franjas[__${i.index}__].fin}">Error</strong>
-                </p>
-                <p th:if="${#fields.hasErrors('franjas[__${i.index}__].rangoValido')}"
-                   th:errors="*{franjas[__${i.index}__].rangoValido}">Error del rango</p>
-                <button type="submit" name="accion" th:value="|quitarFranja:${i.index}|" formnovalidate
-                        th:text="|Quitar franja ${i.count}|">Quitar franja</button>
-            </fieldset>
-
-            <button type="submit" name="accion" value="agregarFranja" formnovalidate>Agregar franja</button>
-        </fieldset>
+        <fieldset th:replace="~{fragmentos/franjas :: franjas(ayuda='Agrega las franjas semanales en las que puedes ofrecer o recibir servicios. Son opcionales; usa «Agregar franja» para añadir una.')}"></fieldset>
 
         <button type="submit">Guardar perfil</button>
     </form>

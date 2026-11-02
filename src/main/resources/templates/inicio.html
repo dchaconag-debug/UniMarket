@@ -11,6 +11,8 @@
     <nav aria-label="Cuenta">
         <ul>
             <li><a th:href="@{/perfil}">Mi perfil</a></li>
+            <li><a th:href="@{/servicios/nuevo}">Publicar servicio</a></li>
+            <li><a th:href="@{/categorias}">Categorías</a></li>
             <li>
                 <form th:action="@{/logout}" method="post">
                     <button type="submit">Cerrar sesión</button>

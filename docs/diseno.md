@@ -25,9 +25,9 @@ Transcripción del [modelo de dominio, E3 p. 9](diagramas/modelo-dominio.png).
 | Usuario | `nombre: String`, `correoInstitucional: String` |
 | Perfil | `carrera: String`, `semestre: Integer`, `avance`, `intereses`, `experiencia`, `especialidad`, `telefonoContacto`, `horariosDisponibilidad`: String |
 | Categoria | `nombre: String` |
-| Servicio | `descripcion: String`, `tarifaPorHora: Decimal`, `intensidadHoraria: Integer`, `experiencia`, `especialidad`, `horariosDisponibilidad`: String; `fechaPublicacion: DateTime`, `estado: EstadoServicio` |
+| Servicio | `titulo: String`, `descripcion: String`, `tarifaPorHora: Integer`, `intensidadHoraria: Integer`, `experiencia`, `especialidad`, `horariosDisponibilidad`: String; `fechaPublicacion: DateTime`, `estado: EstadoServicio` |
 | SolicitudCompra | `fechaCreacion: DateTime`, `fechaUltimaActividad: DateTime`, `estado: EstadoSolicitud` |
-| Propuesta | `tarifaPorHora: Decimal`, `intensidadHoraria: Integer`, `numeroRonda: Integer`, `fechaEnvio: DateTime` |
+| Propuesta | `tarifaPorHora: Integer`, `intensidadHoraria: Integer`, `numeroRonda: Integer`, `fechaEnvio: DateTime` |
 | Notificador | `mensaje: String`, `leida: Boolean`, `fechaCreacion: DateTime`, `tipo: TipoNotificacion` |
 
 Asociaciones visibles:
@@ -108,20 +108,22 @@ Para el parámetro intensidad, aplicar los permisos por rol de [CU-01](requisito
 
 ## Persistencia
 
-Basado en el [esquema, E3 p. 13](diagramas/persistencia.png). Todas las tablas tienen `id integer` como clave primaria. `NN` significa NOT NULL. `usuario` y `perfil` reflejan la autenticación con Google de [CU-03](requisitos.md#cu-03-verificar-perfil); las demás tablas transcriben la imagen sin inferir restricciones adicionales.
+Basado en el [esquema, E3 p. 13](diagramas/persistencia.png). Todas las tablas tienen `id integer` como clave primaria. `NN` significa NOT NULL. `usuario`, `perfil`, `categoria` y `servicio` reflejan las decisiones de implementación descritas abajo; las demás tablas transcriben la imagen sin inferir restricciones adicionales.
 
 | Tabla | Columnas aparte de id |
 | --- | --- |
 | `usuario` | `google_sub varchar(255) NN UNIQUE`, `nombre varchar(100) NN`, `correo_institucional varchar(150) NN UNIQUE`, `fecha_creacion timestamp NN` |
 | `perfil` | `usuario_id integer NN UNIQUE`, `telefono_contacto varchar(20)`, `horarios_disponibilidad text (JSON)`, `fecha_creacion timestamp NN`, `fecha_actualizacion timestamp NN` |
-| `categoria` | `nombre varchar(100) NN` |
-| `servicio` | `ofertante_id integer NN`, `categoria_id integer NN`, `descripcion text`, `tarifa_por_hora decimal(10,2) NN`, `intensidad_horaria integer`, `experiencia text`, `especialidad varchar(100)`, `horarios_disponibilidad text`, `fecha_publicacion timestamp NN`, `estado estado_servicio NN` |
+| `categoria` | `nombre varchar(100) NN UNIQUE` |
+| `servicio` | `ofertador_id integer NN`, `categoria_id integer NN`, `titulo varchar(100) NN`, `descripcion text NN`, `tarifa_por_hora integer NN`, `intensidad_horaria integer NN`, `experiencia text`, `especialidad varchar(100)`, `horarios_disponibilidad text (JSON)`, `fecha_publicacion timestamp NN`, `estado varchar(20) NN` |
 | `solicitud_compra` | `cliente_id integer NN`, `servicio_id integer NN`, `fecha_creacion timestamp NN`, `fecha_ultima_actividad timestamp`, `estado estado_solicitud NN` |
-| `propuesta` | `solicitud_id integer NN`, `autor_id integer NN`, `tarifa_por_hora decimal(10,2) NN`, `intensidad_horaria integer`, `numero_ronda integer NN`, `fecha_envio timestamp NN` |
+| `propuesta` | `solicitud_id integer NN`, `autor_id integer NN`, `tarifa_por_hora integer NN`, `intensidad_horaria integer`, `numero_ronda integer NN`, `fecha_envio timestamp NN` |
 | `notificador` | `usuario_id integer NN`, `solicitud_id integer NN`, `mensaje text NN`, `leida boolean NN`, `fecha_creacion timestamp NN`, `tipo tipo_notificacion NN` |
 
-Las claves foráneas enlazan perfil con usuario; servicio con usuario y categoría; solicitud con cliente y servicio; propuesta con solicitud y autor; notificador con usuario y solicitud. El esquema usa `ofertante_id`, aunque el resto del documento habla de ofertador.
+Las claves foráneas enlazan perfil con usuario; servicio con usuario y categoría; solicitud con cliente y servicio; propuesta con solicitud y autor; notificador con usuario y solicitud.
 
-Los campos académicos y de servicios del formulario de [CU-04](requisitos.md#cu-04-crear-y-actualizar-perfil) (carrera, semestre, avance, intereses, experiencia, especialidad) se agregarán a `perfil` en una migración posterior. `google_sub` guarda el claim `sub` de Google, identificador estable de la cuenta. El esquema original incluía `password_hash`, `telefono` en usuario y `verificado` en perfil; se retiraron porque no hay contraseñas, el teléfono de contacto vive en perfil y toda cuenta queda verificada al iniciar sesión. Usuario y perfil se crean en la misma transacción al guardar el formulario de [CU-04](requisitos.md#cu-04-crear-y-actualizar-perfil); no existe usuario sin perfil. `perfil.horarios_disponibilidad` guarda un arreglo JSON de franjas semanales, por ejemplo `[{"dia":"LUNES","inicio":"08:00","fin":"10:00"}]`, con `dia` de `LUNES` a `DOMINGO`, horas `HH:MM` e `inicio` anterior a `fin`. SQLite no tiene tipo JSON de columna, así que se guarda como texto con un `CHECK` de `json_valid`; la aplicación valida la forma de cada franja. El gráfico muestra un icono junto a categoría sin leyenda; confirmar su unicidad al implementar. Los valores de `tipo_notificacion` no se enumeran. Descripción e intensidad no tienen marca NN en la imagen pese a ser obligatorias en CU-02.
+Los campos académicos y de servicios del formulario de [CU-04](requisitos.md#cu-04-crear-y-actualizar-perfil) (carrera, semestre, avance, intereses, experiencia, especialidad) se agregarán a `perfil` en una migración posterior. `google_sub` guarda el claim `sub` de Google, identificador estable de la cuenta. El esquema original incluía `password_hash`, `telefono` en usuario y `verificado` en perfil; se retiraron porque no hay contraseñas, el teléfono de contacto vive en perfil y toda cuenta queda verificada al iniciar sesión. Usuario y perfil se crean en la misma transacción al guardar el formulario de [CU-04](requisitos.md#cu-04-crear-y-actualizar-perfil); no existe usuario sin perfil. `perfil.horarios_disponibilidad` guarda un arreglo JSON de franjas semanales, por ejemplo `[{"dia":"LUNES","inicio":"08:00","fin":"10:00"}]`, con `dia` de `LUNES` a `DOMINGO`, horas `HH:MM` e `inicio` anterior a `fin`. SQLite no tiene tipo JSON de columna, así que se guarda como texto con un `CHECK` de `json_valid`; la aplicación valida la forma de cada franja. Los valores de `tipo_notificacion` no se enumeran.
 
-El esquema cubre principalmente compra y publicación. Falta representar el grupo de solicitudes competidoras, fecha límite, horarios acordados y acuerdo aceptado explícito, además de persistencia para reseñas, denuncias y guardados. Completar esas estructuras para cumplir los casos de uso. Las validaciones obligatorias de [CU-02](requisitos.md#cu-02-ofertar-y-editar-servicio) se aplican aunque el diagrama no muestre NN en descripción e intensidad.
+En `servicio`, la tarifa se guarda en pesos colombianos enteros, sin decimales, porque SQLite almacena `decimal` como número de punto flotante; `propuesta` usa la misma unidad. La intensidad horaria son horas por semana, entre 1 y 168. `titulo` se agregó al esquema original para listados y búsqueda. La imagen marcaba sin NN la descripción y la intensidad, obligatorias en CU-02. El esquema original llamaba `ofertante_id` a la columna del ofertador. SQLite no tiene tipos enumerados, así que `estado` es texto con un `CHECK` de los valores de `EstadoServicio`, y `horarios_disponibilidad` usa el mismo formato JSON que `perfil`. Las categorías son una lista fija creada por la migración hasta que exista un rol de administrador que las gestione.
+
+El esquema cubre principalmente compra y publicación. Falta representar el grupo de solicitudes competidoras, fecha límite, horarios acordados y acuerdo aceptado explícito, además de persistencia para reseñas, denuncias y guardados. Completar esas estructuras para cumplir los casos de uso.

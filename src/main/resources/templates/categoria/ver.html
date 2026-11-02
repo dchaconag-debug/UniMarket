@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${categoria.nombre} + ' | UniMarket'">Categoría | UniMarket</title>
+</head>
+<body>
+<header>
+    <p><a th:href="@{/}">UniMarket</a></p>
+    <nav aria-label="Ruta">
+        <ol>
+            <li><a th:href="@{/categorias}">Categorías</a></li>
+            <li aria-current="page" th:text="${categoria.nombre}">Tutorías</li>
+        </ol>
+    </nav>
+</header>
+<main>
+    <h1 th:text="${categoria.nombre}">Tutorías</h1>
+
+    <ul th:unless="${#lists.isEmpty(servicios)}">
+        <li th:each="servicio : ${servicios}">
+            <article>
+                <h2><a th:href="@{/servicios/{id}(id=${servicio.id})}" th:text="${servicio.titulo}">Título</a></h2>
+                <p>
+                    <span th:text="${servicio.ofertador.nombre}">Nombre</span> ·
+                    <data th:value="${servicio.tarifaPorHora}" th:text="${formato.pesos(servicio.tarifaPorHora)} + ' por hora'">$25.000 COP por hora</data> ·
+                    <span th:text="${servicio.intensidadHoraria} + ' h/semana'">4 h/semana</span>
+                </p>
+            </article>
+        </li>
+    </ul>
+    <p th:if="${#lists.isEmpty(servicios)}">Aún no hay servicios disponibles en esta categoría.</p>
+</main>
+</body>
+</html>

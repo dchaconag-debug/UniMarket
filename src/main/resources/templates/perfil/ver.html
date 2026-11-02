@@ -45,6 +45,21 @@
             </ul>
             <p th:if="${#lists.isEmpty(perfil.horariosDisponibilidad)}">Sin horarios registrados.</p>
         </section>
+
+        <section aria-labelledby="servicios">
+            <h2 id="servicios">Servicios publicados</h2>
+            <ul th:unless="${#lists.isEmpty(servicios)}">
+                <li th:each="servicio : ${servicios}">
+                    <a th:href="@{/servicios/{id}(id=${servicio.id})}" th:text="${servicio.titulo}">Título</a>
+                    (<span th:text="${servicio.categoria.nombre}">Tutorías</span>,
+                    <data th:value="${servicio.tarifaPorHora}" th:text="${formato.pesos(servicio.tarifaPorHora)} + ' por hora'">$25.000 COP por hora</data>)
+                </li>
+            </ul>
+            <p th:if="${#lists.isEmpty(servicios)}">
+                Sin servicios publicados.
+                <a th:if="${propio}" th:href="@{/servicios/nuevo}">Publicar un servicio</a>
+            </p>
+        </section>
     </article>
 </main>
 </body>

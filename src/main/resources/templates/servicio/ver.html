@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${servicio.titulo} + ' | UniMarket'">Servicio | UniMarket</title>
+</head>
+<body>
+<header>
+    <p><a th:href="@{/}">UniMarket</a></p>
+    <nav aria-label="Ruta">
+        <ol>
+            <li><a th:href="@{/categorias}">Categorías</a></li>
+            <li><a th:href="@{/categorias/{id}(id=${servicio.categoria.id})}" th:text="${servicio.categoria.nombre}">Tutorías</a></li>
+            <li aria-current="page" th:text="${servicio.titulo}">Servicio</li>
+        </ol>
+    </nav>
+</header>
+<main>
+    <p th:if="${mensaje}" role="status" th:text="${mensaje}">Tu servicio fue publicado.</p>
+
+    <article>
+        <header>
+            <h1 th:text="${servicio.titulo}">Título</h1>
+            <p>
+                Publicado por
+                <a th:href="@{/perfiles/{id}(id=${servicio.ofertador.id})}" th:text="${servicio.ofertador.nombre}">Nombre</a>
+                el <time th:datetime="${fechaPublicacionIso}" th:text="${fechaPublicacionTexto}">1 de noviembre de 2026</time>
+            </p>
+        </header>
+
+        <section aria-labelledby="descripcion">
+            <h2 id="descripcion">Descripción</h2>
+            <p th:text="${servicio.descripcion}">Descripción</p>
+        </section>
+
+        <section aria-labelledby="condiciones">
+            <h2 id="condiciones">Condiciones</h2>
+            <dl>
+                <dt>Categoría</dt>
+                <dd th:text="${servicio.categoria.nombre}">Tutorías</dd>
+                <dt>Tarifa por hora</dt>
+                <dd><data th:value="${servicio.tarifaPorHora}" th:text="${tarifa}">$25.000 COP</data></dd>
+                <dt>Intensidad horaria</dt>
+                <dd th:text="${servicio.intensidadHoraria} + ' horas por semana'">4 horas por semana</dd>
+                <th:block th:if="${servicio.especialidad}">
+                    <dt>Especialidad</dt>
+                    <dd th:text="${servicio.especialidad}">Especialidad</dd>
+                </th:block>
+            </dl>
+        </section>
+
+        <section th:if="${servicio.experiencia}" aria-labelledby="experiencia">
+            <h2 id="experiencia">Experiencia</h2>
+            <p th:text="${servicio.experiencia}">Experiencia</p>
+        </section>
+
+        <section aria-labelledby="horarios">
+            <h2 id="horarios">Horarios de disponibilidad</h2>
+            <ul th:unless="${#lists.isEmpty(servicio.horariosDisponibilidad)}">
+                <li th:each="franja : ${servicio.horariosDisponibilidad}">
+                    <span th:text="${franja.dia.nombre}">Lunes</span>,
+                    <time th:datetime="${franja.inicio}" th:text="${franja.inicio}">08:00</time>
+                    a
+                    <time th:datetime="${franja.fin}" th:text="${franja.fin}">10:00</time>
+                </li>
+            </ul>
+            <p th:if="${#lists.isEmpty(servicio.horariosDisponibilidad)}">Sin horarios registrados.</p>
+        </section>
+    </article>
+</main>
+</body>
+</html>

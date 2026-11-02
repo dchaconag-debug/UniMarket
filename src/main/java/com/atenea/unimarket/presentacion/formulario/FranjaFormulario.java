@@ -1,6 +1,7 @@
 package com.atenea.unimarket.presentacion.formulario;
 
 import java.time.LocalTime;
+import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -22,6 +23,21 @@ public class FranjaFormulario {
     @NotNull(message = "Indica la hora de fin.")
     @DateTimeFormat(pattern = "HH:mm")
     private LocalTime fin;
+
+    /**
+     * Applies an add/remove slot button from a form without JavaScript. Anything that is not a
+     * valid row number is ignored instead of failing the request.
+     */
+    public static void aplicarAccion(List<FranjaFormulario> franjas, String accion) {
+        if (accion.equals("agregarFranja")) {
+            franjas.add(new FranjaFormulario());
+        } else if (accion.startsWith("quitarFranja:")) {
+            String indice = accion.substring("quitarFranja:".length());
+            if (indice.matches("\\d{1,4}") && Integer.parseInt(indice) < franjas.size()) {
+                franjas.remove(Integer.parseInt(indice));
+            }
+        }
+    }
 
     @AssertTrue(message = "La hora de inicio debe ser anterior a la hora de fin.")
     public boolean isRangoValido() {
