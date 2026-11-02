@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Read-only weekly availability list. -->
+<th:block th:fragment="horarios(franjas)">
+    <ul th:unless="${#lists.isEmpty(franjas)}" class="list-unstyled schedule-list mb-0">
+        <li th:each="franja : ${franjas}">
+            <span class="schedule-day" th:text="${franja.dia.nombre}">Lunes</span>
+            <span class="schedule-time">
+                <time th:datetime="${franja.inicio}" th:text="${franja.inicio}">08:00</time>
+                a
+                <time th:datetime="${franja.fin}" th:text="${franja.fin}">10:00</time>
+            </span>
+        </li>
+    </ul>
+    <p th:if="${#lists.isEmpty(franjas)}" class="empty-note mb-0">Sin horarios registrados.</p>
+</th:block>
+</body>
+</html>

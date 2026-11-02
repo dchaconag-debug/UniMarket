@@ -22,7 +22,7 @@ public class SecurityConfig {
             ObjectProvider<ClientRegistrationRepository> registrations,
             UnalOidcUserService unalUsers) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login", "/error", "/css/**", "/images/**").permitAll()
+                        .requestMatchers("/login", "/error", "/css/**", "/js/**", "/images/**").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")))
