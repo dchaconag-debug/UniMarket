@@ -4,66 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Completar perfil | UniMarket</title>
+    <link th:replace="~{fragmentos/bootstrap :: styles}">
 </head>
 <body>
-<header>
-    <p>UniMarket</p>
-    <form th:action="@{/logout}" method="post">
-        <button type="submit">Cerrar sesión</button>
-    </form>
-</header>
-<main>
-    <h1>Completa tu perfil</h1>
-    <p>Para usar UniMarket necesitas completar tu perfil. Tu cuenta se crea al guardarlo.</p>
-    <p>Los campos marcados con <abbr title="obligatorio">*</abbr> son obligatorios.</p>
-
-    <form th:action="@{/perfil/nuevo}" th:object="${perfil}" method="post" novalidate>
-        <div th:if="${#fields.hasErrors('*')}" role="alert" id="resumen-errores" tabindex="-1">
-            <h2>Revisa los datos del formulario</h2>
-            <ul>
-                <li th:each="error : ${#fields.allErrors()}" th:text="${error}">Error</li>
-            </ul>
+<header th:replace="~{fragmentos/encabezado :: encabezado('registro')}"></header>
+<main class="container app-main">
+    <div class="page-narrow">
+        <div class="page-head">
+            <h1>Completa tu perfil</h1>
+            <p>Para usar UniMarket necesitas completar tu perfil. Tu cuenta se crea al guardarlo.</p>
+            <p>Los campos marcados con <abbr title="obligatorio">*</abbr> son obligatorios.</p>
         </div>
 
-        <fieldset>
-            <legend>Datos personales</legend>
-            <p>
-                <label for="nombre">Nombre <abbr title="obligatorio">*</abbr></label>
-                <input type="text" th:field="*{nombre}" id="nombre" maxlength="100"
-                       autocomplete="name" required
-                       aria-describedby="nombre-ayuda"
-                       th:attr="aria-invalid=${#fields.hasErrors('nombre')},
-                                aria-errormessage=${#fields.hasErrors('nombre')} ? 'nombre-error' : null">
-                <small id="nombre-ayuda">Así te verán otros usuarios. Tomamos el de tu cuenta de Google; puedes cambiarlo.</small>
-                <strong th:if="${#fields.hasErrors('nombre')}" id="nombre-error"
-                        th:errors="*{nombre}">Error del nombre</strong>
-            </p>
-            <p>
-                <label for="correo">Correo institucional</label>
-                <input type="email" id="correo" th:value="${correo}" readonly aria-describedby="correo-ayuda">
-                <small id="correo-ayuda">Viene de tu cuenta de Google y no se puede cambiar.</small>
-            </p>
-        </fieldset>
+        <form th:action="@{/perfil/nuevo}" th:object="${perfil}" method="post" novalidate class="app-form">
+            <div th:if="${#fields.hasErrors('*')}" role="alert" id="resumen-errores" tabindex="-1"
+                 class="alert theme-danger form-errors">
+                <div>
+                    <h2>Revisa los datos del formulario</h2>
+                    <ul>
+                        <li th:each="error : ${#fields.allErrors()}" th:text="${error}">Error</li>
+                    </ul>
+                </div>
+            </div>
 
-        <fieldset>
-            <legend>Contacto</legend>
-            <p>
-                <label for="telefonoContacto">Teléfono de contacto <abbr title="obligatorio">*</abbr></label>
-                <input type="tel" th:field="*{telefonoContacto}" id="telefonoContacto"
-                       inputmode="tel" autocomplete="tel-national" required
-                       aria-describedby="telefonoContacto-ayuda"
-                       th:attr="aria-invalid=${#fields.hasErrors('telefonoContacto')},
-                                aria-errormessage=${#fields.hasErrors('telefonoContacto')} ? 'telefonoContacto-error' : null">
-                <small id="telefonoContacto-ayuda">Celular colombiano de 10 dígitos, por ejemplo 3001234567.</small>
-                <strong th:if="${#fields.hasErrors('telefonoContacto')}" id="telefonoContacto-error"
-                        th:errors="*{telefonoContacto}">Error del teléfono</strong>
-            </p>
-        </fieldset>
+            <fieldset class="form-section">
+                <legend>Datos personales</legend>
+                <div class="form-field">
+                    <label for="nombre">Nombre <abbr title="obligatorio">*</abbr></label>
+                    <input type="text" th:field="*{nombre}" id="nombre" class="form-control" maxlength="100"
+                           autocomplete="name" required
+                           aria-describedby="nombre-ayuda"
+                           th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid'"
+                           th:attr="aria-invalid=${#fields.hasErrors('nombre')},
+                                    aria-errormessage=${#fields.hasErrors('nombre')} ? 'nombre-error' : null">
+                    <small id="nombre-ayuda" class="form-text">Así te verán otros usuarios. Tomamos el de tu cuenta de Google; puedes cambiarlo.</small>
+                    <strong th:if="${#fields.hasErrors('nombre')}" id="nombre-error" class="field-error"
+                            th:errors="*{nombre}">Error del nombre</strong>
+                </div>
+                <div class="form-field">
+                    <label for="correo">Correo institucional</label>
+                    <input type="email" id="correo" class="form-control" th:value="${correo}" readonly aria-describedby="correo-ayuda">
+                    <small id="correo-ayuda" class="form-text">Viene de tu cuenta de Google y no se puede cambiar.</small>
+                </div>
+            </fieldset>
 
-        <fieldset th:replace="~{fragmentos/franjas :: franjas(ayuda='Agrega las franjas semanales en las que puedes ofrecer o recibir servicios. Son opcionales; usa «Agregar franja» para añadir una.')}"></fieldset>
+            <fieldset class="form-section">
+                <legend>Contacto</legend>
+                <div class="form-field">
+                    <label for="telefonoContacto">Teléfono de contacto <abbr title="obligatorio">*</abbr></label>
+                    <input type="tel" th:field="*{telefonoContacto}" id="telefonoContacto" class="form-control"
+                           inputmode="tel" autocomplete="tel-national" required
+                           aria-describedby="telefonoContacto-ayuda"
+                           th:classappend="${#fields.hasErrors('telefonoContacto')} ? 'is-invalid'"
+                           th:attr="aria-invalid=${#fields.hasErrors('telefonoContacto')},
+                                    aria-errormessage=${#fields.hasErrors('telefonoContacto')} ? 'telefonoContacto-error' : null">
+                    <small id="telefonoContacto-ayuda" class="form-text">Celular colombiano de 10 dígitos, por ejemplo 3001234567.</small>
+                    <strong th:if="${#fields.hasErrors('telefonoContacto')}" id="telefonoContacto-error" class="field-error"
+                            th:errors="*{telefonoContacto}">Error del teléfono</strong>
+                </div>
+            </fieldset>
 
-        <button type="submit">Guardar perfil</button>
-    </form>
+            <fieldset th:replace="~{fragmentos/franjas :: franjas(ayuda='Franjas semanales en las que puedes ofrecer o recibir servicios.')}"></fieldset>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-solid theme-primary btn-lg">Guardar perfil</button>
+            </div>
+        </form>
+    </div>
 </main>
+<script th:replace="~{fragmentos/bootstrap :: scripts}"></script>
 </body>
 </html>

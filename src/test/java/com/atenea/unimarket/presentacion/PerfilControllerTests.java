@@ -69,7 +69,7 @@ class PerfilControllerTests {
                 .andExpect(content().string(containsString("value=\"Ana Google\"")))
                 .andExpect(content().string(containsString("value=\"ana@unal.edu.co\" readonly")))
                 .andExpect(content().string(containsString("<label for=\"telefonoContacto\">")))
-                .andExpect(content().string(containsString("<legend>Horarios de disponibilidad</legend>")));
+                .andExpect(content().string(containsString("<legend>Horarios de disponibilidad")));
         assertThat(usuarios.count()).isZero();
     }
 

@@ -4,33 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${categoria.nombre} + ' | UniMarket'">Categoría | UniMarket</title>
+    <link th:replace="~{fragmentos/bootstrap :: styles}">
 </head>
 <body>
-<header>
-    <p><a th:href="@{/}">UniMarket</a></p>
+<header th:replace="~{fragmentos/encabezado :: encabezado('categorias')}"></header>
+<main class="container app-main">
     <nav aria-label="Ruta">
-        <ol>
-            <li><a th:href="@{/categorias}">Categorías</a></li>
-            <li aria-current="page" th:text="${categoria.nombre}">Tutorías</li>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a class="breadcrumb-link" th:href="@{/categorias}">Categorías</a></li>
+            <li class="breadcrumb-divider" aria-hidden="true"></li>
+            <li class="breadcrumb-item"><span class="breadcrumb-link active" aria-current="page" th:text="${categoria.nombre}">Tutorías</span></li>
         </ol>
     </nav>
-</header>
-<main>
-    <h1 th:text="${categoria.nombre}">Tutorías</h1>
 
-    <ul th:unless="${#lists.isEmpty(servicios)}">
-        <li th:each="servicio : ${servicios}">
-            <article>
-                <h2><a th:href="@{/servicios/{id}(id=${servicio.id})}" th:text="${servicio.titulo}">Título</a></h2>
-                <p>
-                    <span th:text="${servicio.ofertador.nombre}">Nombre</span> ·
-                    <data th:value="${servicio.tarifaPorHora}" th:text="${formato.pesos(servicio.tarifaPorHora)} + ' por hora'">$25.000 COP por hora</data> ·
-                    <span th:text="${servicio.intensidadHoraria} + ' h/semana'">4 h/semana</span>
-                </p>
-            </article>
-        </li>
-    </ul>
-    <p th:if="${#lists.isEmpty(servicios)}">Aún no hay servicios disponibles en esta categoría.</p>
+    <div class="page-head">
+        <h1 th:text="${categoria.nombre}">Tutorías</h1>
+    </div>
+
+    <section class="panel" th:unless="${#lists.isEmpty(servicios)}" aria-label="Servicios disponibles">
+        <ul class="service-list">
+            <li th:each="servicio : ${servicios}">
+                <article class="service-row">
+                    <h2><a th:href="@{/servicios/{id}(id=${servicio.id})}" th:text="${servicio.titulo}">Título</a></h2>
+                    <p class="service-meta">
+                        <span th:text="${servicio.ofertador.nombre}">Nombre</span>,
+                        <span th:text="${servicio.intensidadHoraria} + ' h por semana'">4 h por semana</span>
+                    </p>
+                    <p class="service-rate mb-0">
+                        <data th:value="${servicio.tarifaPorHora}" th:text="${formato.pesos(servicio.tarifaPorHora)}">$25.000 COP</data>
+                        <small>por hora</small>
+                    </p>
+                </article>
+            </li>
+        </ul>
+    </section>
+    <div th:if="${#lists.isEmpty(servicios)}" class="panel">
+        <p class="empty-note">Aún no hay servicios disponibles en esta categoría.</p>
+        <a th:href="@{/servicios/nuevo}" class="btn-solid theme-primary">Publicar un servicio</a>
+    </div>
 </main>
+<script th:replace="~{fragmentos/bootstrap :: scripts}"></script>
 </body>
 </html>

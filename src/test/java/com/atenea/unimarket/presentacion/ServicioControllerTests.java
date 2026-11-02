@@ -79,7 +79,7 @@ class ServicioControllerTests {
                 .andExpect(content().string(containsString("<label for=\"titulo\">")))
                 .andExpect(content().string(containsString("<label for=\"tarifaPorHora\">")))
                 .andExpect(content().string(containsString("<label for=\"intensidadHoraria\">")))
-                .andExpect(content().string(containsString("<legend>Horarios de disponibilidad</legend>")));
+                .andExpect(content().string(containsString("<legend>Horarios de disponibilidad")));
     }
 
     @Test

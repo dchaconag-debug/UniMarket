@@ -2,43 +2,48 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <body>
 <!-- Weekly availability slots. Must be inserted inside a form whose th:object has a "franjas" list. -->
-        <fieldset th:fragment="franjas(ayuda)">
-            <legend>Horarios de disponibilidad</legend>
-            <p th:text="${ayuda}">Ayuda</p>
+        <fieldset th:fragment="franjas(ayuda)" class="form-section">
+            <legend>Horarios de disponibilidad <span class="optional">(opcional)</span></legend>
+            <p th:if="${ayuda}" class="form-section-help" th:text="${ayuda}">Ayuda</p>
 
-            <fieldset th:each="franja, i : *{franjas}">
-                <legend th:text="|Franja ${i.count}|">Franja 1</legend>
-                <p>
-                    <label th:for="|franjas${i.index}.dia|">Día</label>
-                    <select th:field="*{franjas[__${i.index}__].dia}"
+            <fieldset th:each="franja, i : *{franjas}" class="slot">
+                <legend class="visually-hidden" th:text="|Franja ${i.count}|">Franja 1</legend>
+                <div class="slot-field">
+                    <label th:for="|franjas${i.index}.dia|" th:classappend="${!i.first} ? 'visually-hidden'">Día</label>
+                    <select th:field="*{franjas[__${i.index}__].dia}" class="form-control"
+                            th:classappend="${#fields.hasErrors('franjas[__${i.index}__].dia')} ? 'is-invalid'"
                             th:attr="aria-invalid=${#fields.hasErrors('franjas[__${i.index}__].dia')}">
                         <option value="">Selecciona un día</option>
                         <option th:each="dia : ${dias}" th:value="${dia}" th:text="${dia.nombre}">Lunes</option>
                     </select>
-                    <strong th:if="${#fields.hasErrors('franjas[__${i.index}__].dia')}"
+                    <strong th:if="${#fields.hasErrors('franjas[__${i.index}__].dia')}" class="field-error"
                             th:errors="*{franjas[__${i.index}__].dia}">Error</strong>
-                </p>
-                <p>
-                    <label th:for="|franjas${i.index}.inicio|">Desde</label>
-                    <input type="time" th:field="*{franjas[__${i.index}__].inicio}"
+                </div>
+                <div class="slot-field">
+                    <label th:for="|franjas${i.index}.inicio|" th:classappend="${!i.first} ? 'visually-hidden'">Desde</label>
+                    <input type="time" th:field="*{franjas[__${i.index}__].inicio}" class="form-control"
+                           th:classappend="${#fields.hasErrors('franjas[__${i.index}__].inicio')} ? 'is-invalid'"
                            th:attr="aria-invalid=${#fields.hasErrors('franjas[__${i.index}__].inicio')}">
-                    <strong th:if="${#fields.hasErrors('franjas[__${i.index}__].inicio')}"
+                    <strong th:if="${#fields.hasErrors('franjas[__${i.index}__].inicio')}" class="field-error"
                             th:errors="*{franjas[__${i.index}__].inicio}">Error</strong>
-                </p>
-                <p>
-                    <label th:for="|franjas${i.index}.fin|">Hasta</label>
-                    <input type="time" th:field="*{franjas[__${i.index}__].fin}"
+                </div>
+                <div class="slot-field">
+                    <label th:for="|franjas${i.index}.fin|" th:classappend="${!i.first} ? 'visually-hidden'">Hasta</label>
+                    <input type="time" th:field="*{franjas[__${i.index}__].fin}" class="form-control"
+                           th:classappend="${#fields.hasErrors('franjas[__${i.index}__].fin')} ? 'is-invalid'"
                            th:attr="aria-invalid=${#fields.hasErrors('franjas[__${i.index}__].fin')}">
-                    <strong th:if="${#fields.hasErrors('franjas[__${i.index}__].fin')}"
+                    <strong th:if="${#fields.hasErrors('franjas[__${i.index}__].fin')}" class="field-error"
                             th:errors="*{franjas[__${i.index}__].fin}">Error</strong>
-                </p>
-                <p th:if="${#fields.hasErrors('franjas[__${i.index}__].rangoValido')}"
-                   th:errors="*{franjas[__${i.index}__].rangoValido}">Error del rango</p>
+                </div>
                 <button type="submit" name="accion" th:value="|quitarFranja:${i.index}|" formnovalidate
-                        th:text="|Quitar franja ${i.count}|">Quitar franja</button>
+                        class="btn-text theme-danger btn-sm slot-remove"
+                        th:aria-label="|Quitar franja ${i.count}|">Quitar</button>
+                <p th:if="${#fields.hasErrors('franjas[__${i.index}__].rangoValido')}" class="field-error slot-error"
+                   th:errors="*{franjas[__${i.index}__].rangoValido}">Error del rango</p>
             </fieldset>
 
-            <button type="submit" name="accion" value="agregarFranja" formnovalidate>Agregar franja</button>
+            <button type="submit" name="accion" value="agregarFranja" formnovalidate
+                    class="btn-outline theme-primary btn-sm">Agregar franja</button>
         </fieldset>
 </body>
 </html>
