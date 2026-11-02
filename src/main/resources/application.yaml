@@ -9,6 +9,7 @@ spring:
     hikari:
       connection-init-sql: PRAGMA foreign_keys=ON
   jpa:
+    open-in-view: false
     database-platform: org.hibernate.community.dialect.SQLiteDialect
     hibernate:
       ddl-auto: validate

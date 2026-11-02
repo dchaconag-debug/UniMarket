@@ -6,11 +6,22 @@
     <title>UniMarket</title>
 </head>
 <body>
-    <h1>UniMarket</h1>
-    <p>Bienvenido, <span th:text="${nombre}"></span>.</p>
-    <p>Ingresaste con <span th:text="${correo}"></span>.</p>
-    <form th:action="@{/logout}" method="post">
-        <button type="submit">Cerrar sesión</button>
-    </form>
+<header>
+    <p>UniMarket</p>
+    <nav aria-label="Cuenta">
+        <ul>
+            <li><a th:href="@{/perfil}">Mi perfil</a></li>
+            <li>
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit">Cerrar sesión</button>
+                </form>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main>
+    <h1>Bienvenido, <span th:text="${usuario.nombre}"></span>.</h1>
+    <p>Ingresaste con <span th:text="${usuario.correoInstitucional}"></span>.</p>
+</main>
 </body>
 </html>

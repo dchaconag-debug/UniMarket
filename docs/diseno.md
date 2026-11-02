@@ -23,7 +23,7 @@ Transcripción del [modelo de dominio, E3 p. 9](diagramas/modelo-dominio.png).
 | Entidad | Atributos mostrados |
 | --- | --- |
 | Usuario | `nombre: String`, `correoInstitucional: String` |
-| Perfil | `carrera: String`, `semestre: Integer`, `avance`, `intereses`, `experiencia`, `especialidad`, `telefonoContacto`, `horariosDisponibilidad`: String; `verificado: Boolean` |
+| Perfil | `carrera: String`, `semestre: Integer`, `avance`, `intereses`, `experiencia`, `especialidad`, `telefonoContacto`, `horariosDisponibilidad`: String |
 | Categoria | `nombre: String` |
 | Servicio | `descripcion: String`, `tarifaPorHora: Decimal`, `intensidadHoraria: Integer`, `experiencia`, `especialidad`, `horariosDisponibilidad`: String; `fechaPublicacion: DateTime`, `estado: EstadoServicio` |
 | SolicitudCompra | `fechaCreacion: DateTime`, `fechaUltimaActividad: DateTime`, `estado: EstadoSolicitud` |
@@ -41,7 +41,7 @@ Asociaciones visibles:
 
 Las páginas 6 y 8 descartan entidades separadas para cliente, ofertador, negociación, intercambio, formulario y buscador. Negociación se representa mediante SolicitudCompra y el intercambio mediante sus propuestas. Categoría sí es entidad. `numeroRonda` ordena propuestas.
 
-`Notificador` en el modelo tiene datos de una notificación persistida; `INotificador` y `NotificadorCorreo` en diseño son el mecanismo de envío. Son responsabilidades distintas. Falta definir la relación entre persistencia, envío externo, reintentos y fallos, y enumerar los valores de `TipoNotificacion`. Reseñas, denuncias y verificación detallada no aparecen modeladas aquí; eso no las retira del alcance.
+`Notificador` en el modelo tiene datos de una notificación persistida; `INotificador` y `NotificadorCorreo` en diseño son el mecanismo de envío. Son responsabilidades distintas. Falta definir la relación entre persistencia, envío externo, reintentos y fallos, y enumerar los valores de `TipoNotificacion`. Reseñas y denuncias no aparecen modeladas aquí; eso no las retira del alcance.
 
 ## Estados
 
@@ -83,7 +83,7 @@ Al implementar esta secuencia, completar la transacción, el manejo de errores y
 
 1. Ofertador envía datos a `ServicioController.publicarServicio`.
 2. El controlador llama `ServicioService.publicar(ofertadorId, datos)`.
-3. El servicio carga usuario con `IUsuarioRepository` y comprueba perfil verificado.
+3. El servicio carga usuario con `IUsuarioRepository`. El diagrama comprueba perfil verificado; con [CU-03](requisitos.md#cu-03-verificar-perfil) todo usuario autenticado lo está.
 4. Carga categoría con `ICategoriaRepository`.
 5. Crea Servicio con ofertador, categoría y datos; llama `validar()` y lo deja `DISPONIBLE`.
 6. Guarda con `IServicioRepository` y confirma publicación.
@@ -108,12 +108,12 @@ Para el parámetro intensidad, aplicar los permisos por rol de [CU-01](requisito
 
 ## Persistencia
 
-Transcripción visual del [esquema, E3 p. 13](diagramas/persistencia.png). Todas las tablas tienen `id integer` como clave primaria. `NN` significa que la imagen marca NOT NULL. No se infieren restricciones adicionales de los requisitos.
+Basado en el [esquema, E3 p. 13](diagramas/persistencia.png). Todas las tablas tienen `id integer` como clave primaria. `NN` significa NOT NULL. `usuario` y `perfil` reflejan la autenticación con Google de [CU-03](requisitos.md#cu-03-verificar-perfil); las demás tablas transcriben la imagen sin inferir restricciones adicionales.
 
 | Tabla | Columnas aparte de id |
 | --- | --- |
-| `usuario` | `nombre varchar(100) NN`, `correo_institucional varchar(150) NN`, `password_hash varchar(255) NN`, `telefono varchar(20)` |
-| `perfil` | `usuario_id integer NN`, `carrera varchar(100)`, `semestre integer`, `avance varchar(100)`, `intereses text`, `experiencia text`, `especialidad varchar(100)`, `telefono_contacto varchar(20)`, `horarios_disponibilidad text`, `verificado boolean NN` |
+| `usuario` | `google_sub varchar(255) NN UNIQUE`, `nombre varchar(100) NN`, `correo_institucional varchar(150) NN UNIQUE`, `fecha_creacion timestamp NN` |
+| `perfil` | `usuario_id integer NN UNIQUE`, `telefono_contacto varchar(20)`, `horarios_disponibilidad text (JSON)`, `fecha_creacion timestamp NN`, `fecha_actualizacion timestamp NN` |
 | `categoria` | `nombre varchar(100) NN` |
 | `servicio` | `ofertante_id integer NN`, `categoria_id integer NN`, `descripcion text`, `tarifa_por_hora decimal(10,2) NN`, `intensidad_horaria integer`, `experiencia text`, `especialidad varchar(100)`, `horarios_disponibilidad text`, `fecha_publicacion timestamp NN`, `estado estado_servicio NN` |
 | `solicitud_compra` | `cliente_id integer NN`, `servicio_id integer NN`, `fecha_creacion timestamp NN`, `fecha_ultima_actividad timestamp`, `estado estado_solicitud NN` |
@@ -122,6 +122,6 @@ Transcripción visual del [esquema, E3 p. 13](diagramas/persistencia.png). Todas
 
 Las claves foráneas enlazan perfil con usuario; servicio con usuario y categoría; solicitud con cliente y servicio; propuesta con solicitud y autor; notificador con usuario y solicitud. El esquema usa `ofertante_id`, aunque el resto del documento habla de ofertador.
 
-El gráfico muestra iconos adicionales junto a correo, categoría y vínculo de perfil, pero no proporciona una leyenda completa de restricciones. Confirmar unicidad al implementar. Los valores de `tipo_notificacion` no se enumeran. Descripción e intensidad no tienen marca NN en la imagen pese a ser obligatorias en CU-02. Para autenticación, consultar [CU-03](requisitos.md#cu-03-verificar-perfil).
+Los campos académicos y de servicios del formulario de [CU-04](requisitos.md#cu-04-crear-y-actualizar-perfil) (carrera, semestre, avance, intereses, experiencia, especialidad) se agregarán a `perfil` en una migración posterior. `google_sub` guarda el claim `sub` de Google, identificador estable de la cuenta. El esquema original incluía `password_hash`, `telefono` en usuario y `verificado` en perfil; se retiraron porque no hay contraseñas, el teléfono de contacto vive en perfil y toda cuenta queda verificada al iniciar sesión. Usuario y perfil se crean en la misma transacción al guardar el formulario de [CU-04](requisitos.md#cu-04-crear-y-actualizar-perfil); no existe usuario sin perfil. `perfil.horarios_disponibilidad` guarda un arreglo JSON de franjas semanales, por ejemplo `[{"dia":"LUNES","inicio":"08:00","fin":"10:00"}]`, con `dia` de `LUNES` a `DOMINGO`, horas `HH:MM` e `inicio` anterior a `fin`. SQLite no tiene tipo JSON de columna, así que se guarda como texto con un `CHECK` de `json_valid`; la aplicación valida la forma de cada franja. El gráfico muestra un icono junto a categoría sin leyenda; confirmar su unicidad al implementar. Los valores de `tipo_notificacion` no se enumeran. Descripción e intensidad no tienen marca NN en la imagen pese a ser obligatorias en CU-02.
 
-El esquema cubre principalmente compra y publicación. Falta representar el grupo de solicitudes competidoras, fecha límite, horarios acordados y acuerdo aceptado explícito, además de persistencia para reseñas, denuncias, guardados e intentos de verificación. Completar esas estructuras para cumplir los casos de uso. Las validaciones obligatorias de [CU-02](requisitos.md#cu-02-ofertar-y-editar-servicio) se aplican aunque el diagrama no muestre NN en descripción e intensidad.
+El esquema cubre principalmente compra y publicación. Falta representar el grupo de solicitudes competidoras, fecha límite, horarios acordados y acuerdo aceptado explícito, además de persistencia para reseñas, denuncias y guardados. Completar esas estructuras para cumplir los casos de uso. Las validaciones obligatorias de [CU-02](requisitos.md#cu-02-ofertar-y-editar-servicio) se aplican aunque el diagrama no muestre NN en descripción e intensidad.

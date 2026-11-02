@@ -8,13 +8,18 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import com.atenea.unimarket.datos.modelo.Usuario;
+import com.atenea.unimarket.negocio.UsuarioService;
+
 @Controller
 public class LoginController {
 
     private final ObjectProvider<ClientRegistrationRepository> registrations;
+    private final UsuarioService usuarios;
 
-    public LoginController(ObjectProvider<ClientRegistrationRepository> registrations) {
+    public LoginController(ObjectProvider<ClientRegistrationRepository> registrations, UsuarioService usuarios) {
         this.registrations = registrations;
+        this.usuarios = usuarios;
     }
 
     @GetMapping("/login")
@@ -25,8 +30,9 @@ public class LoginController {
 
     @GetMapping("/")
     public String inicio(@AuthenticationPrincipal OidcUser user, Model model) {
-        model.addAttribute("nombre", user.getFullName());
-        model.addAttribute("correo", user.getEmail());
+        // PerfilObligatorioInterceptor guarantees a registered user here.
+        Usuario usuario = usuarios.buscarPorGoogleSub(user.getSubject()).orElseThrow();
+        model.addAttribute("usuario", usuario);
         return "inicio";
     }
 }

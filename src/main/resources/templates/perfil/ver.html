@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${perfil.usuario.nombre} + ' | UniMarket'">Perfil | UniMarket</title>
+</head>
+<body>
+<header>
+    <p><a th:href="@{/}">UniMarket</a></p>
+</header>
+<main>
+    <p th:if="${mensaje}" role="status" th:text="${mensaje}">Tu perfil fue creado.</p>
+
+    <article>
+        <header>
+            <h1 th:text="${perfil.usuario.nombre}">Nombre</h1>
+            <p>
+                Actualizado el
+                <time th:datetime="${fechaActualizacionIso}" th:text="${fechaActualizacionTexto}">1 de noviembre de 2026</time>
+            </p>
+        </header>
+
+        <section aria-labelledby="contacto">
+            <h2 id="contacto">Contacto</h2>
+            <dl>
+                <dt>Correo institucional</dt>
+                <dd><a th:href="|mailto:${perfil.usuario.correoInstitucional}|"
+                       th:text="${perfil.usuario.correoInstitucional}">correo@unal.edu.co</a></dd>
+                <dt>Teléfono</dt>
+                <dd><a th:href="|tel:+57${perfil.telefonoContacto}|"
+                       th:text="${perfil.telefonoContacto}">3001234567</a></dd>
+            </dl>
+        </section>
+
+        <section aria-labelledby="horarios">
+            <h2 id="horarios">Horarios de disponibilidad</h2>
+            <ul th:unless="${#lists.isEmpty(perfil.horariosDisponibilidad)}">
+                <li th:each="franja : ${perfil.horariosDisponibilidad}">
+                    <span th:text="${franja.dia.nombre}">Lunes</span>,
+                    <time th:datetime="${franja.inicio}" th:text="${franja.inicio}">08:00</time>
+                    a
+                    <time th:datetime="${franja.fin}" th:text="${franja.fin}">10:00</time>
+                </li>
+            </ul>
+            <p th:if="${#lists.isEmpty(perfil.horariosDisponibilidad)}">Sin horarios registrados.</p>
+        </section>
+    </article>
+</main>
+</body>
+</html>
