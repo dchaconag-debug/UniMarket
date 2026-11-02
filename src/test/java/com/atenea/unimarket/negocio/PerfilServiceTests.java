@@ -22,6 +22,7 @@ import com.atenea.unimarket.datos.modelo.FranjaHorario;
 import com.atenea.unimarket.datos.modelo.Perfil;
 import com.atenea.unimarket.datos.modelo.Usuario;
 import com.atenea.unimarket.datos.repositorio.PerfilRepository;
+import com.atenea.unimarket.datos.repositorio.ServicioRepository;
 import com.atenea.unimarket.datos.repositorio.UsuarioRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,6 +38,9 @@ class PerfilServiceTests {
     PerfilRepository perfiles;
 
     @Autowired
+    ServicioRepository servicios;
+
+    @Autowired
     UsuarioRepository usuarios;
 
     @Autowired
@@ -44,6 +48,7 @@ class PerfilServiceTests {
 
     @BeforeEach
     void limpiar() {
+        servicios.deleteAll();
         perfiles.deleteAll();
         usuarios.deleteAll();
     }

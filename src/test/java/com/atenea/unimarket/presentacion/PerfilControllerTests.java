@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import com.atenea.unimarket.datos.modelo.Perfil;
 import com.atenea.unimarket.datos.modelo.Usuario;
 import com.atenea.unimarket.datos.repositorio.PerfilRepository;
+import com.atenea.unimarket.datos.repositorio.ServicioRepository;
 import com.atenea.unimarket.datos.repositorio.UsuarioRepository;
 import com.atenea.unimarket.negocio.PerfilService;
 
@@ -41,8 +42,12 @@ class PerfilControllerTests {
     @Autowired
     PerfilRepository perfiles;
 
+    @Autowired
+    ServicioRepository servicios;
+
     @BeforeEach
     void limpiar() {
+        servicios.deleteAll();
         perfiles.deleteAll();
         usuarios.deleteAll();
     }
@@ -184,6 +189,18 @@ class PerfilControllerTests {
                         .param("accion", "quitarFranja:0"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(not(containsString("Franja 1"))));
+    }
+
+    @Test
+    void accionDeFranjaConHoraIlegibleReMuestraElFormulario() throws Exception {
+        mvc.perform(post("/perfil/nuevo").with(ana()).with(csrf())
+                        .param("nombre", "Ana")
+                        .param("franjas[0].inicio", "abc")
+                        .param("accion", "agregarFranja"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Ingresa una hora válida.")))
+                .andExpect(content().string(containsString("Franja 2")));
+        assertThat(usuarios.count()).isZero();
     }
 
     @Test

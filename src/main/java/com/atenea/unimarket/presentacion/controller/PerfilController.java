@@ -25,6 +25,7 @@ import com.atenea.unimarket.datos.modelo.Perfil;
 import com.atenea.unimarket.datos.modelo.Usuario;
 import com.atenea.unimarket.negocio.PerfilService;
 import com.atenea.unimarket.negocio.PerfilYaExisteException;
+import com.atenea.unimarket.negocio.ServicioService;
 import com.atenea.unimarket.negocio.UsuarioService;
 import com.atenea.unimarket.presentacion.formulario.FranjaFormulario;
 import com.atenea.unimarket.presentacion.formulario.PerfilFormulario;
@@ -38,10 +39,12 @@ public class PerfilController {
 
     private final UsuarioService usuarios;
     private final PerfilService perfiles;
+    private final ServicioService servicios;
 
-    public PerfilController(UsuarioService usuarios, PerfilService perfiles) {
+    public PerfilController(UsuarioService usuarios, PerfilService perfiles, ServicioService servicios) {
         this.usuarios = usuarios;
         this.perfiles = perfiles;
+        this.servicios = servicios;
     }
 
     @ModelAttribute("dias")
@@ -69,20 +72,13 @@ public class PerfilController {
     /** Adds or removes a slot row without JavaScript; the form is re-rendered without validating. */
     @PostMapping(path = "/perfil/nuevo", params = {"accion"})
     public String editarFranjas(@AuthenticationPrincipal OidcUser oidc,
-            @ModelAttribute("perfil") PerfilFormulario formulario, @RequestParam String accion, Model model) {
+            @ModelAttribute("perfil") PerfilFormulario formulario, BindingResult erroresDeConversion,
+            @RequestParam String accion, Model model) {
         if (usuarios.estaRegistrado(oidc.getSubject())) {
             return "redirect:/perfil";
         }
         model.addAttribute("correo", oidc.getEmail());
-        if (accion.equals("agregarFranja")) {
-            formulario.getFranjas().add(new FranjaFormulario());
-        } else if (accion.startsWith("quitarFranja:")) {
-            String indice = accion.substring("quitarFranja:".length());
-            // Ignore anything that is not a valid row number instead of failing the request.
-            if (indice.matches("\\d{1,4}") && Integer.parseInt(indice) < formulario.getFranjas().size()) {
-                formulario.getFranjas().remove(Integer.parseInt(indice));
-            }
-        }
+        FranjaFormulario.aplicarAccion(formulario.getFranjas(), accion);
         return "perfil/formulario";
     }
 
@@ -113,6 +109,8 @@ public class PerfilController {
         Perfil perfil = perfiles.buscarPorUsuarioId(usuarioId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         model.addAttribute("perfil", perfil);
+        model.addAttribute("servicios", servicios.disponiblesDeOfertador(usuarioId));
+        model.addAttribute("formato", new ServicioController.FormatoPesos());
         model.addAttribute("propio", perfil.getUsuario().getId().equals(usuarioActual(oidc).getId()));
         ZonedDateTime actualizacion = perfil.getFechaActualizacion().atZone(ZONA);
         model.addAttribute("fechaActualizacionIso", actualizacion.toOffsetDateTime().toString());

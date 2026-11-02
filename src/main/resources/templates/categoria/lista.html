@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Categorías | UniMarket</title>
+</head>
+<body>
+<header>
+    <p><a th:href="@{/}">UniMarket</a></p>
+</header>
+<main>
+    <h1>Categorías</h1>
+    <ul>
+        <li th:each="categoria : ${categorias}">
+            <a th:href="@{/categorias/{id}(id=${categoria.id})}" th:text="${categoria.nombre}">Tutorías</a>
+        </li>
+    </ul>
+</main>
+</body>
+</html>

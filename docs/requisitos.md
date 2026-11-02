@@ -44,9 +44,10 @@ Historias de E2 pp. 25-26: `COMPRA-CLI-H01` contratar condiciones publicadas; `H
 
 Actor principal: ofertador. E2 pp. 6-7, 26-27; E3 pp. 3, 7-8, 11.
 
-- Campos obligatorios: categoría, descripción, tarifa por hora e intensidad horaria.
+- Campos obligatorios: categoría, título, descripción, tarifa por hora e intensidad horaria.
 - Campos opcionales: experiencia, especialidad y horarios de disponibilidad.
-- Validar antes de publicar. Una tarifa menor o igual a cero es inválida. Falta definir moneda y límites de intensidad horaria.
+- Validar antes de publicar. La tarifa por hora es un valor entero en pesos colombianos y debe ser mayor que cero. La intensidad horaria son horas por semana, entre 1 y 168.
+- Las categorías son una lista fija: Tutorías, Clases particulares, Asesoría de tesis y trabajos, Diseño y Escritura. Un futuro rol de administrador las gestionará.
 - Crear el servicio en `DISPONIBLE`, vincularlo al ofertador y a su categoría, mostrarlo en catálogo y confirmar la publicación.
 - Para editar un servicio propio, cargar sus valores actuales y aplicar las validaciones de publicación.
 - Si hay una negociación o transacción en curso, bloquear cambios a tarifa e intensidad; permitir modificar los demás campos. Esto no impide contrapropuestas dentro de la negociación.
