@@ -114,6 +114,7 @@ abbr[title="obligatorio"] { color: #9b2c2c; text-decoration: none; cursor: help;
     letter-spacing: -.02em;
 }
 .form-section-help { margin: -.75rem 0 0; color: var(--unal-gray); }
+.app-form .form-field { align-content: start; }
 .form-field .form-text { margin-top: -.25rem; color: var(--unal-gray); }
 .form-control[readonly] { background-color: var(--um-canvas); color: var(--unal-gray); box-shadow: none; }
 .field-error { display: block; color: #9b2c2c; font-size: .875rem; font-weight: 600; }
