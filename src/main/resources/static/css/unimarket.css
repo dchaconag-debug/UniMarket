@@ -210,8 +210,3 @@ abbr[title="obligatorio"] { color: #9b2c2c; text-decoration: none; cursor: help;
     color: var(--um-ink);
 }
 .welcome p { max-width: 36rem; margin: 1rem 0 0; font-size: 1.125rem; }
-.shortcut-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem; margin: 1.5rem 0 0; padding: 0; list-style: none; }
-.shortcut-list a { display: block; height: 100%; padding: 1.25rem 1.5rem; border: 1px solid var(--um-line); border-radius: .75rem; background: var(--um-surface); color: var(--um-ink); text-decoration: none; }
-.shortcut-list a:hover { border-color: var(--bs-primary-border); }
-.shortcut-list strong { display: block; color: var(--unal-green-ink); font-size: 1.125rem; letter-spacing: -.02em; }
-.shortcut-list span { display: block; margin-top: .25rem; color: var(--unal-gray); }

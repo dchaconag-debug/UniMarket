@@ -13,27 +13,6 @@
         <h1 id="bienvenida">Bienvenido, <span th:text="${usuario.nombre}"></span>.</h1>
         <p>Ingresaste con <span th:text="${usuario.correoInstitucional}"></span>.</p>
     </section>
-
-    <ul class="shortcut-list">
-        <li>
-            <a th:href="@{/categorias}">
-                <strong>Explorar categorías</strong>
-                <span>Encuentra tutorías, asesorías y otros servicios de la comunidad.</span>
-            </a>
-        </li>
-        <li>
-            <a th:href="@{/servicios/nuevo}">
-                <strong>Publicar servicio</strong>
-                <span>Ofrece lo que sabes hacer, con tu tarifa y tus horarios.</span>
-            </a>
-        </li>
-        <li>
-            <a th:href="@{/perfil}">
-                <strong>Mi perfil</strong>
-                <span>Revisa tus datos de contacto y tus servicios publicados.</span>
-            </a>
-        </li>
-    </ul>
 </main>
 <script th:replace="~{fragmentos/bootstrap :: scripts}"></script>
 </body>
