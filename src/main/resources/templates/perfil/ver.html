@@ -4,63 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title th:text="${perfil.usuario.nombre} + ' | UniMarket'">Perfil | UniMarket</title>
+    <link th:replace="~{fragmentos/bootstrap :: styles}">
 </head>
 <body>
-<header>
-    <p><a th:href="@{/}">UniMarket</a></p>
-</header>
-<main>
-    <p th:if="${mensaje}" role="status" th:text="${mensaje}">Tu perfil fue creado.</p>
+<header th:replace="~{fragmentos/encabezado :: encabezado(${propio} ? 'perfil' : '')}"></header>
+<main class="container app-main">
+    <div th:if="${mensaje}" class="alert theme-success mb-6" role="status">
+        <p th:text="${mensaje}">Tu perfil fue creado.</p>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Cerrar aviso"></button>
+    </div>
 
     <article>
-        <header>
+        <header class="page-head">
             <h1 th:text="${perfil.usuario.nombre}">Nombre</h1>
-            <p>
+            <p class="byline">
                 Actualizado el
                 <time th:datetime="${fechaActualizacionIso}" th:text="${fechaActualizacionTexto}">1 de noviembre de 2026</time>
             </p>
         </header>
 
-        <section aria-labelledby="contacto">
-            <h2 id="contacto">Contacto</h2>
-            <dl>
-                <dt>Correo institucional</dt>
-                <dd><a th:href="|mailto:${perfil.usuario.correoInstitucional}|"
-                       th:text="${perfil.usuario.correoInstitucional}">correo@unal.edu.co</a></dd>
-                <dt>Teléfono</dt>
-                <dd><a th:href="|tel:+57${perfil.telefonoContacto}|"
-                       th:text="${perfil.telefonoContacto}">3001234567</a></dd>
-            </dl>
-        </section>
+        <div class="row g-6">
+            <div class="col-12 lg:col-8">
+                <section class="panel" aria-labelledby="servicios">
+                    <h2 id="servicios">Servicios publicados</h2>
+                    <ul th:unless="${#lists.isEmpty(servicios)}" class="service-list">
+                        <li th:each="servicio : ${servicios}">
+                            <div class="service-row">
+                                <h3><a th:href="@{/servicios/{id}(id=${servicio.id})}" th:text="${servicio.titulo}">Título</a></h3>
+                                <p class="service-meta" th:text="${servicio.categoria.nombre}">Tutorías</p>
+                                <p class="service-rate mb-0">
+                                    <data th:value="${servicio.tarifaPorHora}" th:text="${formato.pesos(servicio.tarifaPorHora)}">$25.000 COP</data>
+                                    <small>por hora</small>
+                                </p>
+                            </div>
+                        </li>
+                    </ul>
+                    <th:block th:if="${#lists.isEmpty(servicios)}">
+                        <p class="empty-note" th:classappend="${propio} ? '' : 'mb-0'">Sin servicios publicados.</p>
+                        <a th:if="${propio}" th:href="@{/servicios/nuevo}" class="btn-solid theme-primary">Publicar un servicio</a>
+                    </th:block>
+                </section>
+            </div>
 
-        <section aria-labelledby="horarios">
-            <h2 id="horarios">Horarios de disponibilidad</h2>
-            <ul th:unless="${#lists.isEmpty(perfil.horariosDisponibilidad)}">
-                <li th:each="franja : ${perfil.horariosDisponibilidad}">
-                    <span th:text="${franja.dia.nombre}">Lunes</span>,
-                    <time th:datetime="${franja.inicio}" th:text="${franja.inicio}">08:00</time>
-                    a
-                    <time th:datetime="${franja.fin}" th:text="${franja.fin}">10:00</time>
-                </li>
-            </ul>
-            <p th:if="${#lists.isEmpty(perfil.horariosDisponibilidad)}">Sin horarios registrados.</p>
-        </section>
+            <div class="col-12 lg:col-4">
+                <section class="panel" aria-labelledby="contacto">
+                    <h2 id="contacto">Contacto</h2>
+                    <dl class="facts">
+                        <div>
+                            <dt>Correo institucional</dt>
+                            <dd><a th:href="|mailto:${perfil.usuario.correoInstitucional}|"
+                                   th:text="${perfil.usuario.correoInstitucional}">correo@unal.edu.co</a></dd>
+                        </div>
+                        <div>
+                            <dt>Teléfono</dt>
+                            <dd><a th:href="|tel:+57${perfil.telefonoContacto}|"
+                                   th:text="${perfil.telefonoContacto}">3001234567</a></dd>
+                        </div>
+                    </dl>
+                </section>
 
-        <section aria-labelledby="servicios">
-            <h2 id="servicios">Servicios publicados</h2>
-            <ul th:unless="${#lists.isEmpty(servicios)}">
-                <li th:each="servicio : ${servicios}">
-                    <a th:href="@{/servicios/{id}(id=${servicio.id})}" th:text="${servicio.titulo}">Título</a>
-                    (<span th:text="${servicio.categoria.nombre}">Tutorías</span>,
-                    <data th:value="${servicio.tarifaPorHora}" th:text="${formato.pesos(servicio.tarifaPorHora)} + ' por hora'">$25.000 COP por hora</data>)
-                </li>
-            </ul>
-            <p th:if="${#lists.isEmpty(servicios)}">
-                Sin servicios publicados.
-                <a th:if="${propio}" th:href="@{/servicios/nuevo}">Publicar un servicio</a>
-            </p>
-        </section>
+                <section class="panel" aria-labelledby="horarios">
+                    <h2 id="horarios">Horarios de disponibilidad</h2>
+                    <th:block th:replace="~{fragmentos/horarios :: horarios(${perfil.horariosDisponibilidad})}"></th:block>
+                </section>
+            </div>
+        </div>
     </article>
 </main>
+<script th:replace="~{fragmentos/bootstrap :: scripts}"></script>
 </body>
 </html>

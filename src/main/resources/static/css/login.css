@@ -1,0 +1,38 @@
+/* Login layout. Shared tokens and the UNAL theme live in unimarket.css. */
+.login-shell {
+    display: grid;
+    align-items: center;
+    min-height: 100svh;
+    padding-block: 2rem;
+}
+
+.login-layout {
+    overflow: hidden;
+    border: 1px solid var(--um-line);
+    border-radius: 1.25rem;
+    background: var(--um-surface);
+}
+
+.campus-panel {
+    min-height: 36rem;
+    padding: clamp(2rem, 4vw, 4rem);
+    background: var(--unal-green);
+    color: var(--um-ink);
+}
+
+.brand-name { font-size: 1.6rem; font-weight: 750; letter-spacing: -.06em; }
+.campus-message h1 { color: var(--um-ink); font-size: clamp(2.4rem, 4vw, 3.6rem); line-height: 1.08; letter-spacing: -.045em; font-weight: 750; }
+.campus-message p { max-width: 28rem; margin-block: 1.5rem 2rem; font-size: 1.125rem; }
+.campus-signature { font-size: .9rem; }
+.login-panel { padding: clamp(1.5rem, 3vw, 3rem); }
+.login-card { --bs-card-border-width: 0; --bs-card-bg: transparent; }
+.login-card .card-body { padding: 0; }
+.login-card h2 { font-size: 1.75rem; font-weight: 700; letter-spacing: -.035em; }
+.login-description, .login-note { color: var(--unal-gray); }
+.login-note { font-size: .875rem; line-height: 1.6; }
+
+@media (width < 1024px) {
+    .campus-panel { min-height: auto; gap: 2rem; }
+    .campus-message p { margin-bottom: 0; }
+    .login-panel { padding-block: 2.5rem; }
+}

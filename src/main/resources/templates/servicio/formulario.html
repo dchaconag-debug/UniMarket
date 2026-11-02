@@ -4,99 +4,118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Publicar servicio | UniMarket</title>
+    <link th:replace="~{fragmentos/bootstrap :: styles}">
 </head>
 <body>
-<header>
-    <p><a th:href="@{/}">UniMarket</a></p>
-</header>
-<main>
-    <h1>Publicar un servicio</h1>
-    <p>Los campos marcados con <abbr title="obligatorio">*</abbr> son obligatorios.</p>
-
-    <form th:action="@{/servicios/nuevo}" th:object="${servicio}" method="post" novalidate>
-        <div th:if="${#fields.hasErrors('*')}" role="alert" id="resumen-errores" tabindex="-1">
-            <h2>Revisa los datos del servicio</h2>
-            <ul>
-                <li th:each="error : ${#fields.allErrors()}" th:text="${error}">Error</li>
-            </ul>
+<header th:replace="~{fragmentos/encabezado :: encabezado('publicar')}"></header>
+<main class="container app-main">
+    <div class="page-narrow">
+        <div class="page-head">
+            <h1>Publicar un servicio</h1>
+            <p>Los campos marcados con <abbr title="obligatorio">*</abbr> son obligatorios.</p>
         </div>
 
-        <fieldset>
-            <legend>Servicio</legend>
-            <p>
-                <label for="categoriaId">Categoría <abbr title="obligatorio">*</abbr></label>
-                <select th:field="*{categoriaId}" id="categoriaId" required
-                        th:attr="aria-invalid=${#fields.hasErrors('categoriaId')},
-                                 aria-errormessage=${#fields.hasErrors('categoriaId')} ? 'categoriaId-error' : null">
-                    <option value="">Selecciona una categoría</option>
-                    <option th:each="categoria : ${categorias}" th:value="${categoria.id}"
-                            th:text="${categoria.nombre}">Tutorías</option>
-                </select>
-                <strong th:if="${#fields.hasErrors('categoriaId')}" id="categoriaId-error"
-                        th:errors="*{categoriaId}">Error</strong>
-            </p>
-            <p>
-                <label for="titulo">Título <abbr title="obligatorio">*</abbr></label>
-                <input type="text" th:field="*{titulo}" id="titulo" maxlength="100" required
-                       aria-describedby="titulo-ayuda"
-                       th:attr="aria-invalid=${#fields.hasErrors('titulo')},
-                                aria-errormessage=${#fields.hasErrors('titulo')} ? 'titulo-error' : null">
-                <small id="titulo-ayuda">Por ejemplo: Tutorías de cálculo diferencial.</small>
-                <strong th:if="${#fields.hasErrors('titulo')}" id="titulo-error" th:errors="*{titulo}">Error</strong>
-            </p>
-            <p>
-                <label for="descripcion">Descripción <abbr title="obligatorio">*</abbr></label>
-                <textarea th:field="*{descripcion}" id="descripcion" rows="6" maxlength="5000" required
-                          th:attr="aria-invalid=${#fields.hasErrors('descripcion')},
-                                   aria-errormessage=${#fields.hasErrors('descripcion')} ? 'descripcion-error' : null"></textarea>
-                <strong th:if="${#fields.hasErrors('descripcion')}" id="descripcion-error"
-                        th:errors="*{descripcion}">Error</strong>
-            </p>
-        </fieldset>
+        <form th:action="@{/servicios/nuevo}" th:object="${servicio}" method="post" novalidate class="app-form">
+            <div th:if="${#fields.hasErrors('*')}" role="alert" id="resumen-errores" tabindex="-1"
+                 class="alert theme-danger form-errors">
+                <div>
+                    <h2>Revisa los datos del servicio</h2>
+                    <ul>
+                        <li th:each="error : ${#fields.allErrors()}" th:text="${error}">Error</li>
+                    </ul>
+                </div>
+            </div>
 
-        <fieldset>
-            <legend>Condiciones</legend>
-            <p>
-                <label for="tarifaPorHora">Tarifa por hora (pesos colombianos) <abbr title="obligatorio">*</abbr></label>
-                <input type="number" th:field="*{tarifaPorHora}" id="tarifaPorHora" min="1" step="1"
-                       inputmode="numeric" required aria-describedby="tarifaPorHora-ayuda"
-                       th:attr="aria-invalid=${#fields.hasErrors('tarifaPorHora')},
-                                aria-errormessage=${#fields.hasErrors('tarifaPorHora')} ? 'tarifaPorHora-error' : null">
-                <small id="tarifaPorHora-ayuda">Valor entero en pesos, sin puntos ni decimales. Por ejemplo: 25000.</small>
-                <strong th:if="${#fields.hasErrors('tarifaPorHora')}" id="tarifaPorHora-error"
-                        th:errors="*{tarifaPorHora}">Error</strong>
-            </p>
-            <p>
-                <label for="intensidadHoraria">Intensidad horaria (horas por semana) <abbr title="obligatorio">*</abbr></label>
-                <input type="number" th:field="*{intensidadHoraria}" id="intensidadHoraria" min="1" max="168" step="1"
-                       inputmode="numeric" required
-                       th:attr="aria-invalid=${#fields.hasErrors('intensidadHoraria')},
-                                aria-errormessage=${#fields.hasErrors('intensidadHoraria')} ? 'intensidadHoraria-error' : null">
-                <strong th:if="${#fields.hasErrors('intensidadHoraria')}" id="intensidadHoraria-error"
-                        th:errors="*{intensidadHoraria}">Error</strong>
-            </p>
-        </fieldset>
+            <fieldset class="form-section">
+                <legend>Servicio</legend>
+                <div class="form-field">
+                    <label for="categoriaId">Categoría <abbr title="obligatorio">*</abbr></label>
+                    <select th:field="*{categoriaId}" id="categoriaId" class="form-control" required
+                            th:classappend="${#fields.hasErrors('categoriaId')} ? 'is-invalid'"
+                            th:attr="aria-invalid=${#fields.hasErrors('categoriaId')},
+                                     aria-errormessage=${#fields.hasErrors('categoriaId')} ? 'categoriaId-error' : null">
+                        <option value="">Selecciona una categoría</option>
+                        <option th:each="categoria : ${categorias}" th:value="${categoria.id}"
+                                th:text="${categoria.nombre}">Tutorías</option>
+                    </select>
+                    <strong th:if="${#fields.hasErrors('categoriaId')}" id="categoriaId-error" class="field-error"
+                            th:errors="*{categoriaId}">Error</strong>
+                </div>
+                <div class="form-field">
+                    <label for="titulo">Título <abbr title="obligatorio">*</abbr></label>
+                    <input type="text" th:field="*{titulo}" id="titulo" class="form-control" maxlength="100" required
+                           aria-describedby="titulo-ayuda"
+                           th:classappend="${#fields.hasErrors('titulo')} ? 'is-invalid'"
+                           th:attr="aria-invalid=${#fields.hasErrors('titulo')},
+                                    aria-errormessage=${#fields.hasErrors('titulo')} ? 'titulo-error' : null">
+                    <small id="titulo-ayuda" class="form-text">Por ejemplo: Tutorías de cálculo diferencial.</small>
+                    <strong th:if="${#fields.hasErrors('titulo')}" id="titulo-error" class="field-error"
+                            th:errors="*{titulo}">Error</strong>
+                </div>
+                <div class="form-field">
+                    <label for="descripcion">Descripción <abbr title="obligatorio">*</abbr></label>
+                    <textarea th:field="*{descripcion}" id="descripcion" class="form-control" rows="6" maxlength="5000" required
+                              th:classappend="${#fields.hasErrors('descripcion')} ? 'is-invalid'"
+                              th:attr="aria-invalid=${#fields.hasErrors('descripcion')},
+                                       aria-errormessage=${#fields.hasErrors('descripcion')} ? 'descripcion-error' : null"></textarea>
+                    <strong th:if="${#fields.hasErrors('descripcion')}" id="descripcion-error" class="field-error"
+                            th:errors="*{descripcion}">Error</strong>
+                </div>
+            </fieldset>
 
-        <fieldset>
-            <legend>Información complementaria</legend>
-            <p>
-                <label for="experiencia">Experiencia</label>
-                <textarea th:field="*{experiencia}" id="experiencia" rows="4" maxlength="5000"
-                          th:attr="aria-invalid=${#fields.hasErrors('experiencia')}"></textarea>
-                <strong th:if="${#fields.hasErrors('experiencia')}" th:errors="*{experiencia}">Error</strong>
-            </p>
-            <p>
-                <label for="especialidad">Especialidad</label>
-                <input type="text" th:field="*{especialidad}" id="especialidad" maxlength="100"
-                       th:attr="aria-invalid=${#fields.hasErrors('especialidad')}">
-                <strong th:if="${#fields.hasErrors('especialidad')}" th:errors="*{especialidad}">Error</strong>
-            </p>
-        </fieldset>
+            <fieldset class="form-section">
+                <legend>Condiciones</legend>
+                <div class="row g-6">
+                    <div class="col-12 md:col-6 form-field">
+                        <label for="tarifaPorHora">Tarifa por hora (pesos colombianos) <abbr title="obligatorio">*</abbr></label>
+                        <input type="number" th:field="*{tarifaPorHora}" id="tarifaPorHora" class="form-control" min="1" step="1"
+                               inputmode="numeric" required aria-describedby="tarifaPorHora-ayuda"
+                               th:classappend="${#fields.hasErrors('tarifaPorHora')} ? 'is-invalid'"
+                               th:attr="aria-invalid=${#fields.hasErrors('tarifaPorHora')},
+                                        aria-errormessage=${#fields.hasErrors('tarifaPorHora')} ? 'tarifaPorHora-error' : null">
+                        <small id="tarifaPorHora-ayuda" class="form-text">Valor entero en pesos, sin puntos ni decimales. Por ejemplo: 25000.</small>
+                        <strong th:if="${#fields.hasErrors('tarifaPorHora')}" id="tarifaPorHora-error" class="field-error"
+                                th:errors="*{tarifaPorHora}">Error</strong>
+                    </div>
+                    <div class="col-12 md:col-6 form-field">
+                        <label for="intensidadHoraria">Intensidad horaria (horas por semana) <abbr title="obligatorio">*</abbr></label>
+                        <input type="number" th:field="*{intensidadHoraria}" id="intensidadHoraria" class="form-control" min="1" max="168" step="1"
+                               inputmode="numeric" required
+                               th:classappend="${#fields.hasErrors('intensidadHoraria')} ? 'is-invalid'"
+                               th:attr="aria-invalid=${#fields.hasErrors('intensidadHoraria')},
+                                        aria-errormessage=${#fields.hasErrors('intensidadHoraria')} ? 'intensidadHoraria-error' : null">
+                        <strong th:if="${#fields.hasErrors('intensidadHoraria')}" id="intensidadHoraria-error" class="field-error"
+                                th:errors="*{intensidadHoraria}">Error</strong>
+                    </div>
+                </div>
+            </fieldset>
 
-        <fieldset th:replace="~{fragmentos/franjas :: franjas(ayuda='Franjas semanales en las que ofreces este servicio. Son opcionales; usa «Agregar franja» para añadir una.')}"></fieldset>
+            <fieldset class="form-section">
+                <legend>Información complementaria</legend>
+                <div class="form-field">
+                    <label for="experiencia">Experiencia</label>
+                    <textarea th:field="*{experiencia}" id="experiencia" class="form-control" rows="4" maxlength="5000"
+                              th:classappend="${#fields.hasErrors('experiencia')} ? 'is-invalid'"
+                              th:attr="aria-invalid=${#fields.hasErrors('experiencia')}"></textarea>
+                    <strong th:if="${#fields.hasErrors('experiencia')}" class="field-error" th:errors="*{experiencia}">Error</strong>
+                </div>
+                <div class="form-field">
+                    <label for="especialidad">Especialidad</label>
+                    <input type="text" th:field="*{especialidad}" id="especialidad" class="form-control" maxlength="100"
+                           th:classappend="${#fields.hasErrors('especialidad')} ? 'is-invalid'"
+                           th:attr="aria-invalid=${#fields.hasErrors('especialidad')}">
+                    <strong th:if="${#fields.hasErrors('especialidad')}" class="field-error" th:errors="*{especialidad}">Error</strong>
+                </div>
+            </fieldset>
 
-        <button type="submit">Publicar servicio</button>
-    </form>
+            <fieldset th:replace="~{fragmentos/franjas :: franjas(ayuda='Franjas semanales en las que ofreces este servicio. Son opcionales; usa «Agregar franja» para añadir una.')}"></fieldset>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-solid theme-primary btn-lg">Publicar servicio</button>
+            </div>
+        </form>
+    </div>
 </main>
+<script th:replace="~{fragmentos/bootstrap :: scripts}"></script>
 </body>
 </html>

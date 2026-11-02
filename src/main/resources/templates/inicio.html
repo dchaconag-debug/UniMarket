@@ -4,26 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>UniMarket</title>
+    <link th:replace="~{fragmentos/bootstrap :: styles}">
 </head>
 <body>
-<header>
-    <p>UniMarket</p>
-    <nav aria-label="Cuenta">
-        <ul>
-            <li><a th:href="@{/perfil}">Mi perfil</a></li>
-            <li><a th:href="@{/servicios/nuevo}">Publicar servicio</a></li>
-            <li><a th:href="@{/categorias}">Categorías</a></li>
-            <li>
-                <form th:action="@{/logout}" method="post">
-                    <button type="submit">Cerrar sesión</button>
-                </form>
-            </li>
-        </ul>
-    </nav>
-</header>
-<main>
-    <h1>Bienvenido, <span th:text="${usuario.nombre}"></span>.</h1>
-    <p>Ingresaste con <span th:text="${usuario.correoInstitucional}"></span>.</p>
+<header th:replace="~{fragmentos/encabezado :: encabezado('inicio')}"></header>
+<main class="container app-main">
+    <section class="welcome" aria-labelledby="bienvenida">
+        <h1 id="bienvenida">Bienvenido, <span th:text="${usuario.nombre}"></span>.</h1>
+        <p>Ingresaste con <span th:text="${usuario.correoInstitucional}"></span>.</p>
+    </section>
+
+    <ul class="shortcut-list">
+        <li>
+            <a th:href="@{/categorias}">
+                <strong>Explorar categorías</strong>
+                <span>Encuentra tutorías, asesorías y otros servicios de la comunidad.</span>
+            </a>
+        </li>
+        <li>
+            <a th:href="@{/servicios/nuevo}">
+                <strong>Publicar servicio</strong>
+                <span>Ofrece lo que sabes hacer, con tu tarifa y tus horarios.</span>
+            </a>
+        </li>
+        <li>
+            <a th:href="@{/perfil}">
+                <strong>Mi perfil</strong>
+                <span>Revisa tus datos de contacto y tus servicios publicados.</span>
+            </a>
+        </li>
+    </ul>
 </main>
+<script th:replace="~{fragmentos/bootstrap :: scripts}"></script>
 </body>
 </html>

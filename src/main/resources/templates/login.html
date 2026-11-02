@@ -4,13 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Ingresar | UniMarket</title>
+    <link th:replace="~{fragmentos/bootstrap :: styles}">
+    <link rel="stylesheet" th:href="@{/css/login.css}">
 </head>
 <body>
-    <h1>UniMarket</h1>
-    <p>Ingresa con tu cuenta institucional @unal.edu.co.</p>
-    <p th:if="${param.error}" role="alert">No se pudo iniciar sesión. Usa una cuenta institucional de la UNAL e intenta de nuevo.</p>
-    <p th:if="${param.logout}">Cerraste tu sesión en UniMarket.</p>
-    <a th:if="${googleConfigured}" th:href="@{/oauth2/authorization/google}">Ingresar con Google</a>
-    <p th:unless="${googleConfigured}">El inicio de sesión con Google aún no está configurado.</p>
+    <main class="container login-shell">
+        <div class="row g-0 login-layout">
+            <section class="col-12 lg:col-6 campus-panel d-flex flex-column justify-content-between" aria-labelledby="brand-title">
+                <p class="brand-name" id="brand-title">UniMarket</p>
+                <div class="campus-message">
+                    <h1>El mercado de<br>tu comunidad.</h1>
+                    <p>Ofrece y encuentra tutorías, asesorías y otros servicios dentro de la Universidad Nacional de Colombia.</p>
+                </div>
+                <p class="mb-0 campus-signature">Hecho para la comunidad UNAL.</p>
+            </section>
+            <section class="col-12 lg:col-6 login-panel d-flex align-items-center" aria-labelledby="login-title">
+                <div class="card login-card w-100">
+                    <div class="card-body">
+                        <h2 id="login-title" class="mb-3">Ingresa a UniMarket</h2>
+                        <p class="login-description mb-4">Usa tu cuenta institucional <strong>@unal.edu.co</strong> para continuar.</p>
+                        <div th:if="${param.error}" class="alert theme-danger mb-4" role="alert">
+                            <p>No se pudo iniciar sesión. Usa una cuenta institucional de la UNAL e intenta de nuevo.</p>
+                        </div>
+                        <div th:if="${param.logout}" class="alert theme-success mb-4" role="status">
+                            <p>Cerraste tu sesión en UniMarket.</p>
+                            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Cerrar aviso"></button>
+                        </div>
+                        <a th:if="${googleConfigured}" th:href="@{/oauth2/authorization/google}" class="btn-solid theme-primary btn-lg w-100">Ingresar con Google</a>
+                        <div th:unless="${googleConfigured}" class="alert theme-warning" role="status">
+                            <p>El inicio de sesión con Google aún no está configurado.</p>
+                        </div>
+                        <p class="login-note mt-4 mb-0">El acceso está reservado a cuentas de la Universidad Nacional de Colombia.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+    <script th:replace="~{fragmentos/bootstrap :: scripts}"></script>
 </body>
 </html>

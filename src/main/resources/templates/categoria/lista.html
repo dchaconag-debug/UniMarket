@@ -4,18 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Categorías | UniMarket</title>
+    <link th:replace="~{fragmentos/bootstrap :: styles}">
 </head>
 <body>
-<header>
-    <p><a th:href="@{/}">UniMarket</a></p>
-</header>
-<main>
-    <h1>Categorías</h1>
-    <ul>
+<header th:replace="~{fragmentos/encabezado :: encabezado('categorias')}"></header>
+<main class="container app-main">
+    <div class="page-head">
+        <h1>Categorías</h1>
+        <p>Elige una categoría para ver los servicios disponibles.</p>
+    </div>
+    <ul class="category-grid">
         <li th:each="categoria : ${categorias}">
             <a th:href="@{/categorias/{id}(id=${categoria.id})}" th:text="${categoria.nombre}">Tutorías</a>
         </li>
     </ul>
 </main>
+<script th:replace="~{fragmentos/bootstrap :: scripts}"></script>
 </body>
 </html>
