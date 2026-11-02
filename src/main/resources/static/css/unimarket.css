@@ -78,6 +78,7 @@ a.app-brand:hover { color: var(--unal-green-ink); }
 .page-head { margin-bottom: 2rem; }
 .page-head p { max-width: 42rem; margin: .75rem 0 0; color: var(--unal-gray); font-size: 1.0625rem; }
 .page-narrow { max-width: 46rem; }
+.page-form { max-width: 60rem; }
 
 .breadcrumb { margin-bottom: 1.25rem; margin-inline-start: -.75rem; flex-wrap: wrap; }
 
@@ -123,10 +124,33 @@ abbr[title="obligatorio"] { color: #9b2c2c; text-decoration: none; cursor: help;
 .form-errors ul { margin: 0; padding-inline-start: 1.25rem; }
 .form-errors:focus { outline: 2px solid #9b2c2c; outline-offset: 2px; }
 
-.slot { padding: 1rem 1.25rem 1.25rem; border-left: 4px solid var(--unal-green); border-radius: .5rem; background: var(--um-canvas); }
-.slot > legend { float: none; margin-bottom: .5rem; font-size: .9375rem; font-weight: 700; }
-.slot-remove { display: flex; justify-content: flex-end; }
+/* One slot per row: day, from, to, remove. Labels are shown only on the first row. */
+.slot { display: grid; grid-template-columns: minmax(9rem, 14rem) repeat(2, minmax(7rem, 9rem)) auto; gap: .75rem; align-items: end; }
+.slot + .slot { margin-top: -.5rem; }
+.slot-field { display: grid; gap: .5rem; }
+.slot-remove { justify-self: start; }
+.slot-error { grid-column: 1 / -1; margin: 0; }
 .form-section > .btn-outline { justify-self: start; }
+
+@media (width < 576px) {
+    .slot { grid-template-columns: 1fr 1fr; padding-bottom: .75rem; border-bottom: 1px solid var(--um-line); }
+    .slot .slot-field:first-of-type { grid-column: 1 / -1; }
+    .slot + .slot { margin-top: 0; }
+}
+
+/* A single card holding every section, split by rules instead of separate cards. */
+.form-card {
+    display: grid;
+    gap: 1.75rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
+    border: 1px solid var(--um-line);
+    border-radius: .75rem;
+    background: var(--um-surface);
+}
+.form-card > .form-section { padding: 0; border: 0; border-radius: 0; background: none; }
+.form-card > .form-section + .form-section,
+.form-card > .form-actions { padding-top: 1.75rem; border-top: 1px solid var(--um-line); }
+.optional { color: var(--unal-gray); font-weight: 400; }
 
 .form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; padding-top: .5rem; }
 
