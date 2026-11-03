@@ -7,7 +7,7 @@ preview main  [here.](https://unimarket-main.onrender.com/)
 
 1. **Clona el repositorio:**
    ```bash
-   git clone [https://github.com/tu-usuario/unimarket.git](https://github.com/tu-usuario/unimarket.git)
+   git clone [https://github.com/nauj2024/UniMarket](https://github.com/nauj2024/UniMarket)
    cd unimarket
 
 Requires Java 21.
