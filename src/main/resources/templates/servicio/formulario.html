@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Publicar servicio | UniMarket</title>
+    <title th:text="${editando} ? 'Editar servicio | UniMarket' : 'Publicar servicio | UniMarket'">Publicar servicio | UniMarket</title>
     <link th:replace="~{fragmentos/bootstrap :: styles}">
 </head>
 <body>
@@ -11,10 +11,10 @@
 <main class="container app-main">
     <div class="page-form">
         <div class="page-head">
-            <h1>Publicar un servicio</h1>
+            <h1 th:text="${editando} ? 'Editar servicio' : 'Publicar un servicio'">Publicar un servicio</h1>
         </div>
 
-        <form th:action="@{/servicios/nuevo}" th:object="${servicio}" method="post" novalidate class="app-form">
+        <form th:action="${editando} ? @{/servicios/{id}/editar(id=${servicioId})} : @{/servicios/nuevo}" th:object="${servicio}" method="post" novalidate class="app-form">
             <div th:if="${#fields.hasErrors('*')}" role="alert" id="resumen-errores" tabindex="-1"
                  class="alert theme-danger form-errors">
                 <div>
@@ -23,6 +23,10 @@
                         <li th:each="error : ${#fields.allErrors()}" th:text="${error}">Error</li>
                     </ul>
                 </div>
+            </div>
+
+            <div th:if="${bloqueado}" class="alert theme-warning mb-6" role="status">
+                <p>Este servicio tiene negociaciones en curso: no puedes cambiar la tarifa ni la intensidad horaria, pero sí los demás datos.</p>
             </div>
 
             <div class="form-card">
@@ -67,6 +71,7 @@
                                 <span class="input-group-text" aria-hidden="true">$</span>
                                 <input type="number" th:field="*{tarifaPorHora}" id="tarifaPorHora" class="form-control" min="1" step="1"
                                        inputmode="numeric" required aria-describedby="tarifaPorHora-unidad"
+                                       th:readonly="${bloqueado}"
                                        th:classappend="${#fields.hasErrors('tarifaPorHora')} ? 'is-invalid'"
                                        th:attr="aria-invalid=${#fields.hasErrors('tarifaPorHora')},
                                                 aria-errormessage=${#fields.hasErrors('tarifaPorHora')} ? 'tarifaPorHora-error' : null">
@@ -81,6 +86,7 @@
                             <label for="intensidadHoraria">Horas por semana</label>
                             <input type="number" th:field="*{intensidadHoraria}" id="intensidadHoraria" class="form-control" min="1" max="168" step="1"
                                    inputmode="numeric" required
+                                   th:readonly="${bloqueado}"
                                    th:classappend="${#fields.hasErrors('intensidadHoraria')} ? 'is-invalid'"
                                    th:attr="aria-invalid=${#fields.hasErrors('intensidadHoraria')},
                                             aria-errormessage=${#fields.hasErrors('intensidadHoraria')} ? 'intensidadHoraria-error' : null">
@@ -107,7 +113,7 @@
                 <fieldset th:replace="~{fragmentos/franjas :: franjas(ayuda=null)}"></fieldset>
 
                 <div class="form-actions">
-                    <button type="submit" class="btn-solid theme-primary">Publicar servicio</button>
+                    <button type="submit" class="btn-solid theme-primary" th:text="${editando} ? 'Guardar cambios' : 'Publicar servicio'">Publicar servicio</button>
                 </div>
             </div>
         </form>

@@ -22,13 +22,15 @@ public class ServicioService {
     private final ServicioRepository servicios;
     private final UsuarioRepository usuarios;
     private final CategoriaRepository categorias;
+    private final NegociacionesEnCurso negociaciones;
     private final Clock reloj;
 
     public ServicioService(ServicioRepository servicios, UsuarioRepository usuarios,
-            CategoriaRepository categorias, Clock reloj) {
+            CategoriaRepository categorias, NegociacionesEnCurso negociaciones, Clock reloj) {
         this.servicios = servicios;
         this.usuarios = usuarios;
         this.categorias = categorias;
+        this.negociaciones = negociaciones;
         this.reloj = reloj;
     }
 
@@ -54,6 +56,40 @@ public class ServicioService {
                 datos.horarios() == null ? List.of() : datos.horarios(),
                 Instant.now(reloj));
         return servicios.save(servicio);
+    }
+
+        /**
+     * Edits a service of the offerer. Only its owner may edit it. While the service has
+     * negotiations in progress the rate and weekly hours stay fixed; everything else can change.
+     */
+    @Transactional
+    public Servicio editar(Integer servicioId, Integer ofertadorId, DatosServicio datos) {
+        Servicio servicio = servicios.findById(servicioId).orElseThrow(ServicioNoEncontradoException::new);
+        if (!servicio.getOfertador().getId().equals(ofertadorId)) {
+            throw new EdicionNoPermitidaException();
+        }
+        Categoria categoria = Optional.ofNullable(datos.categoriaId())
+                .flatMap(categorias::findById)
+                .orElseThrow(CategoriaNoEncontradaException::new);
+        int tarifa = requerirNumero(datos.tarifaPorHora(), "tarifa por hora");
+        int intensidad = requerirNumero(datos.intensidadHoraria(), "intensidad horaria");
+        if (servicio.cambiaCondiciones(tarifa, intensidad) && negociaciones.hayParaServicio(servicioId)) {
+            throw new CondicionesBloqueadasException();
+        }
+        servicio.actualizar(categoria,
+                obligatorio(datos.titulo(), "título"),
+                obligatorio(datos.descripcion(), "descripción"),
+                tarifa, intensidad,
+                opcional(datos.experiencia()),
+                opcional(datos.especialidad()),
+                datos.horarios() == null ? List.of() : datos.horarios());
+        return servicios.save(servicio);
+    }
+
+    /** Whether the rate and weekly hours of the service are locked by negotiations in progress. */
+    @Transactional(readOnly = true)
+    public boolean condicionesBloqueadas(Integer servicioId) {
+        return negociaciones.hayParaServicio(servicioId);
     }
 
     @Transactional(readOnly = true)

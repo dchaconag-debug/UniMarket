@@ -45,6 +45,21 @@ public class ServicioFormulario {
     @Valid
     private List<FranjaFormulario> franjas = new ArrayList<>();
 
+        /** A form prefilled with the current values of a service, to edit it. */
+    public static ServicioFormulario desde(Servicio servicio) {
+        ServicioFormulario formulario = new ServicioFormulario();
+        formulario.categoriaId = servicio.getCategoria().getId();
+        formulario.titulo = servicio.getTitulo();
+        formulario.descripcion = servicio.getDescripcion();
+        formulario.tarifaPorHora = servicio.getTarifaPorHora();
+        formulario.intensidadHoraria = servicio.getIntensidadHoraria();
+        formulario.experiencia = servicio.getExperiencia();
+        formulario.especialidad = servicio.getEspecialidad();
+        formulario.franjas = new ArrayList<>(
+                servicio.getHorariosDisponibilidad().stream().map(FranjaFormulario::desde).toList());
+        return formulario;
+    }
+
     public DatosServicio aDatos() {
         return new DatosServicio(categoriaId, titulo, descripcion, tarifaPorHora, intensidadHoraria,
                 experiencia, especialidad, franjas.stream().map(FranjaFormulario::aFranja).toList());

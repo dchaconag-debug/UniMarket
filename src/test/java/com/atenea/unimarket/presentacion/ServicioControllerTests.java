@@ -15,6 +15,7 @@ import com.atenea.unimarket.datos.modelo.Servicio;
 import com.atenea.unimarket.datos.repositorio.PerfilRepository;
 import com.atenea.unimarket.datos.repositorio.ServicioRepository;
 import com.atenea.unimarket.datos.repositorio.UsuarioRepository;
+import com.atenea.unimarket.negocio.DatosServicio;
 import com.atenea.unimarket.negocio.PerfilService;
 import com.atenea.unimarket.negocio.ServicioService;
 
@@ -229,6 +230,90 @@ class ServicioControllerTests {
         mvc.perform(get("/servicios/" + servicio.getId()).with(ana()))
                 .andExpect(content().string(containsString("&lt;script&gt;")))
                 .andExpect(content().string(not(containsString("<script>x()"))));
+    }
+
+    // ---- Editar servicio (OFERTA-OFE-H02) ----
+
+    @Test
+    void elFormularioDeEdicionVieneConLosDatosActuales() throws Exception {
+        Integer id = publicarDeAna();
+
+        mvc.perform(get("/servicios/" + id + "/editar").with(ana()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("value=\"C&aacute;lculo I\"")))
+                .andExpect(content().string(containsString("value=\"25000\"")))
+                .andExpect(content().string(containsString("Guardar cambios")));
+    }
+
+    @Test
+    void editarConDatosValidosActualizaYConfirma() throws Exception {
+        Integer id = publicarDeAna();
+
+        mvc.perform(valido(post("/servicios/" + id + "/editar").with(ana()).with(csrf()),
+                        "titulo", "Cálculo II", "tarifaPorHora", "30000"))
+                .andExpect(redirectedUrl("/servicios/" + id))
+                .andExpect(flash().attribute("mensaje", "Tu servicio fue actualizado."));
+
+        Servicio servicio = servicios.findById(id).orElseThrow();
+        assertThat(servicio.getTitulo()).isEqualTo("Cálculo II");
+        assertThat(servicio.getTarifaPorHora()).isEqualTo(30000);
+    }
+
+    @Test
+    void editarConDatosInvalidosNoGuardaYMuestraElError() throws Exception {
+        Integer id = publicarDeAna();
+
+        mvc.perform(valido(post("/servicios/" + id + "/editar").with(ana()).with(csrf()), "tarifaPorHora", "0"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("La tarifa por hora debe ser mayor que cero.")))
+                .andExpect(content().string(containsString("Guardar cambios")));
+
+        assertThat(servicios.findById(id).orElseThrow().getTarifaPorHora()).isEqualTo(25000);
+    }
+
+    @Test
+    void otroUsuarioNoPuedeEditarElServicio() throws Exception {
+        Integer id = publicarDeAna();
+        perfiles.registrar("sub-beto", "beto@unal.edu.co", "Beto", "3109876543", List.of());
+
+        mvc.perform(get("/servicios/" + id + "/editar").with(como("sub-beto")))
+                .andExpect(status().isForbidden());
+        mvc.perform(valido(post("/servicios/" + id + "/editar").with(como("sub-beto")).with(csrf()),
+                        "titulo", "Robado"))
+                .andExpect(status().isForbidden());
+
+        assertThat(servicios.findById(id).orElseThrow().getTitulo()).isEqualTo("Cálculo I");
+    }
+
+    @Test
+    void editarUnServicioInexistenteDaNoEncontrado() throws Exception {
+        mvc.perform(get("/servicios/999999/editar").with(ana())).andExpect(status().isNotFound());
+        mvc.perform(valido(post("/servicios/999999/editar").with(ana()).with(csrf())))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void editarSinTokenCsrfEsRechazado() throws Exception {
+        Integer id = publicarDeAna();
+
+        mvc.perform(valido(post("/servicios/" + id + "/editar").with(ana())))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void elBotonEditarSoloLoVeElOfertador() throws Exception {
+        Integer id = publicarDeAna();
+        perfiles.registrar("sub-beto", "beto@unal.edu.co", "Beto", "3109876543", List.of());
+
+        mvc.perform(get("/servicios/" + id).with(ana()))
+                .andExpect(content().string(containsString("/servicios/" + id + "/editar")));
+        mvc.perform(get("/servicios/" + id).with(como("sub-beto")))
+                .andExpect(content().string(not(containsString("/servicios/" + id + "/editar"))));
+    }
+
+    private Integer publicarDeAna() {
+        return catalogo.publicar(anaId, new DatosServicio(tutoriasId, "Cálculo I",
+                "Tutorías de cálculo diferencial.", 25000, 4, null, null, List.of())).getId();
     }
 
     /** A valid publish request; each pair in {@code cambios} replaces one field, e.g. "tarifaPorHora", "0". */
