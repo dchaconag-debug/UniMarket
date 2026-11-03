@@ -8,6 +8,8 @@
         <span th:if="${seccion == 'registro'}" class="app-brand">UniMarket</span>
         <nav th:if="${seccion != 'registro'}" class="app-nav" aria-label="Principal">
             <ul>
+                <li><a th:href="@{/servicios}"
+                        th:attr="aria-current=${seccion == 'catalogo'} ? 'page' : null">Catálogo</a></li>
                 <li><a th:href="@{/categorias}"
                        th:attr="aria-current=${seccion == 'categorias'} ? 'page' : null">Categorías</a></li>
                 <li><a th:href="@{/servicios/nuevo}"

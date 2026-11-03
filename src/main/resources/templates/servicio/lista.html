@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Catálogo | UniMarket</title>
+    <link th:replace="~{fragmentos/bootstrap :: styles}">
+</head>
+<body>
+<header th:replace="~{fragmentos/encabezado :: encabezado('catalogo')}"></header>
+<main class="container app-main">
+    <div class="page-head">
+        <h1>Servicios disponibles</h1>
+        <p>Explora las ofertas de la comunidad universitaria.</p>
+    </div>
+
+    <div th:if="${aviso}" class="alert theme-warning mb-6" role="status">
+        <p th:text="${aviso}">Este servicio ya no está disponible.</p>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Cerrar aviso"></button>
+    </div>
+
+    <form method="get" th:action="@{/servicios}" class="mb-6">
+        <label for="orden">Ordenar por</label>
+        <select id="orden" name="orden">
+            <option th:each="o : ${ordenes}" th:value="${o.name()}" th:text="${o.etiqueta}"
+                    th:selected="${o == orden}">Más recientes</option>
+        </select>
+        <button type="submit" class="btn-outline theme-primary btn-sm">Aplicar</button>
+    </form>
+
+    <section class="panel" th:unless="${#lists.isEmpty(servicios)}" aria-label="Servicios disponibles">
+        <ul class="service-list">
+            <li th:each="servicio : ${servicios}">
+                <article class="service-row">
+                    <h2><a th:href="@{/servicios/{id}(id=${servicio.id})}" th:text="${servicio.titulo}">Título</a></h2>
+                    <p class="service-meta">
+                        <span th:text="${servicio.categoria.nombre}">Tutorías</span>,
+                        <span th:text="${servicio.ofertador.nombre}">Nombre</span>,
+                        <span th:text="${servicio.intensidadHoraria} + ' h por semana'">4 h por semana</span>
+                    </p>
+                    <p class="service-rate mb-0">
+                        <data th:value="${servicio.tarifaPorHora}" th:text="${formato.pesos(servicio.tarifaPorHora)}">$25.000 COP</data>
+                        <small>por hora</small>
+                    </p>
+                </article>
+            </li>
+        </ul>
+    </section>
+    <div th:if="${#lists.isEmpty(servicios)}" class="panel">
+        <p class="empty-note">Aún no hay servicios disponibles.</p>
+        <a th:href="@{/servicios/nuevo}" class="btn-solid theme-primary">Publicar un servicio</a>
+    </div>
+</main>
+<script th:replace="~{fragmentos/bootstrap :: scripts}"></script>
+</body>
+</html>
