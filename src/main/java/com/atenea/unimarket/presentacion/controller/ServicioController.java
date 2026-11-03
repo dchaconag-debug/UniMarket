@@ -25,6 +25,7 @@ import com.atenea.unimarket.datos.modelo.DiaSemana;
 import com.atenea.unimarket.datos.modelo.Servicio;
 import com.atenea.unimarket.datos.modelo.Usuario;
 import com.atenea.unimarket.negocio.CategoriaNoEncontradaException;
+import com.atenea.unimarket.negocio.CondicionesBloqueadasException;
 import com.atenea.unimarket.negocio.ServicioService;
 import com.atenea.unimarket.negocio.UsuarioService;
 import com.atenea.unimarket.presentacion.formulario.FranjaFormulario;
@@ -88,12 +89,62 @@ public class ServicioController {
         return "redirect:/servicios/" + servicio.getId();
     }
 
+    @GetMapping("/servicios/{id}/editar")
+    public String formularioEdicion(@AuthenticationPrincipal OidcUser oidc, @PathVariable Integer id, Model model) {
+        Servicio servicio = servicioDelOfertador(id, oidc);
+        model.addAttribute("servicio", ServicioFormulario.desde(servicio));
+        prepararEdicion(model, id);
+        return "servicio/formulario";
+    }
+
+    /** Adds or removes a slot row while editing; same as for a new service. */
+    @PostMapping(path = "/servicios/{id}/editar", params = {"accion"})
+    public String editarFranjasAlEditar(@AuthenticationPrincipal OidcUser oidc, @PathVariable Integer id,
+            @ModelAttribute("servicio") ServicioFormulario formulario, BindingResult erroresDeConversion,
+            @RequestParam String accion, Model model) {
+        servicioDelOfertador(id, oidc);
+        FranjaFormulario.aplicarAccion(formulario.getFranjas(), accion);
+        prepararEdicion(model, id);
+        return "servicio/formulario";
+    }
+
+    @PostMapping("/servicios/{id}/editar")
+    public String editar(@AuthenticationPrincipal OidcUser oidc, @PathVariable Integer id,
+            @Validated @ModelAttribute("servicio") ServicioFormulario formulario, BindingResult errores,
+            RedirectAttributes redireccion, Model model) {
+        servicioDelOfertador(id, oidc);
+        if (formulario.getCategoriaId() != null && servicios.buscarCategoria(formulario.getCategoriaId()).isEmpty()) {
+            errores.rejectValue("categoriaId", "categoria.inexistente", "Selecciona una categoría de la lista.");
+        }
+        if (errores.hasErrors()) {
+            prepararEdicion(model, id);
+            return "servicio/formulario";
+        }
+        try {
+            servicios.editar(id, usuarioActual(oidc).getId(), formulario.aDatos());
+        } catch (CategoriaNoEncontradaException noExiste) {
+            errores.rejectValue("categoriaId", "categoria.inexistente", "Selecciona una categoría de la lista.");
+            prepararEdicion(model, id);
+            return "servicio/formulario";
+        } catch (CondicionesBloqueadasException bloqueadas) {
+            errores.reject("condiciones.bloqueadas", bloqueadas.getMessage());
+            prepararEdicion(model, id);
+            return "servicio/formulario";
+        }
+        redireccion.addFlashAttribute("mensaje", "Tu servicio fue actualizado.");
+        return "redirect:/servicios/" + id;
+    }
+
     @GetMapping("/servicios/{id}")
-    public String ver(@PathVariable Integer id, Model model) {
+    public String ver(@AuthenticationPrincipal OidcUser oidc, @PathVariable Integer id, Model model) {
         Servicio servicio = servicios.buscarPorId(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         ZonedDateTime publicacion = servicio.getFechaPublicacion().atZone(PerfilController.ZONA);
+        boolean esOfertador = usuarios.buscarPorGoogleSub(oidc.getSubject())
+                .map(usuario -> usuario.getId().equals(servicio.getOfertador().getId()))
+                .orElse(false);
         model.addAttribute("servicio", servicio);
+        model.addAttribute("esOfertador", esOfertador);
         model.addAttribute("tarifa", pesos(servicio.getTarifaPorHora()));
         model.addAttribute("fechaPublicacionIso", publicacion.toOffsetDateTime().toString());
         model.addAttribute("fechaPublicacionTexto", FECHA.format(publicacion));
@@ -131,5 +182,22 @@ public class ServicioController {
     private Usuario usuarioActual(OidcUser oidc) {
         return usuarios.buscarPorGoogleSub(oidc.getSubject())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN));
+    }
+
+    /** The service if it exists and belongs to the signed-in user; 404 or 403 otherwise. */
+    private Servicio servicioDelOfertador(Integer id, OidcUser oidc) {
+        Servicio servicio = servicios.buscarPorId(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        if (!servicio.getOfertador().getId().equals(usuarioActual(oidc).getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+        return servicio;
+    }
+
+    private void prepararEdicion(Model model, Integer id) {
+        model.addAttribute("categorias", servicios.categorias());
+        model.addAttribute("editando", true);
+        model.addAttribute("servicioId", id);
+        model.addAttribute("bloqueado", servicios.condicionesBloqueadas(id));
     }
 }

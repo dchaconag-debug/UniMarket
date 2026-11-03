@@ -73,6 +73,7 @@
                         </div>
                     </dl>
                     <a th:href="@{/perfiles/{id}(id=${servicio.ofertador.id})}" class="btn-outline theme-primary">Ver contacto del ofertador</a>
+                    <a th:if="${esOfertador}" th:href="@{/servicios/{id}/editar(id=${servicio.id})}" class="btn-outline theme-primary">Editar servicio</a>
                 </section>
             </aside>
         </div>

@@ -44,6 +44,14 @@ public class FranjaFormulario {
         return inicio == null || fin == null || inicio.isBefore(fin);
     }
 
+        public static FranjaFormulario desde(FranjaHorario franja) {
+        FranjaFormulario formulario = new FranjaFormulario();
+        formulario.setDia(franja.dia());
+        formulario.setInicio(franja.inicio());
+        formulario.setFin(franja.fin());
+        return formulario;
+    }
+
     public FranjaHorario aFranja() {
         return new FranjaHorario(dia, inicio, fin);
     }

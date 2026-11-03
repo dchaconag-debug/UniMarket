@@ -74,16 +74,7 @@ public class Servicio {
     public Servicio(Usuario ofertador, Categoria categoria, String titulo, String descripcion,
             int tarifaPorHora, int intensidadHoraria, String experiencia, String especialidad,
             List<FranjaHorario> horariosDisponibilidad, Instant fechaPublicacion) {
-        if (tarifaPorHora <= 0) {
-            throw new IllegalArgumentException("La tarifa por hora debe ser mayor que cero.");
-        }
-        if (intensidadHoraria < 1 || intensidadHoraria > INTENSIDAD_MAXIMA) {
-            throw new IllegalArgumentException("La intensidad horaria debe estar entre 1 y 168 horas por semana.");
-        }
-        limitarLargo(titulo, LARGO_TITULO, "título");
-        limitarLargo(descripcion, LARGO_TEXTO, "descripción");
-        limitarLargo(experiencia, LARGO_TEXTO, "experiencia");
-        limitarLargo(especialidad, LARGO_ESPECIALIDAD, "especialidad");
+        validar(titulo, descripcion, tarifaPorHora, intensidadHoraria, experiencia, especialidad);
         this.ofertador = ofertador;
         this.categoria = categoria;
         this.titulo = titulo;
@@ -95,6 +86,43 @@ public class Servicio {
         this.horariosDisponibilidad = List.copyOf(horariosDisponibilidad);
         this.fechaPublicacion = fechaPublicacion;
         this.estado = EstadoServicio.DISPONIBLE;
+    }
+
+    /**
+     * Replaces the offer's editable data with the same rules as publishing. The offerer, the
+     * state and the publication date never change here.
+     */
+    public void actualizar(Categoria categoria, String titulo, String descripcion, int tarifaPorHora,
+            int intensidadHoraria, String experiencia, String especialidad,
+            List<FranjaHorario> horariosDisponibilidad) {
+        validar(titulo, descripcion, tarifaPorHora, intensidadHoraria, experiencia, especialidad);
+        this.categoria = categoria;
+        this.titulo = titulo;
+        this.descripcion = descripcion;
+        this.tarifaPorHora = tarifaPorHora;
+        this.intensidadHoraria = intensidadHoraria;
+        this.experiencia = experiencia;
+        this.especialidad = especialidad;
+        this.horariosDisponibilidad = List.copyOf(horariosDisponibilidad);
+    }
+
+    /** Whether the given rate or weekly hours differ from the ones published. */
+    public boolean cambiaCondiciones(int tarifaPorHora, int intensidadHoraria) {
+        return !this.tarifaPorHora.equals(tarifaPorHora) || !this.intensidadHoraria.equals(intensidadHoraria);
+    }
+
+    private static void validar(String titulo, String descripcion, int tarifaPorHora, int intensidadHoraria,
+            String experiencia, String especialidad) {
+        if (tarifaPorHora <= 0) {
+            throw new IllegalArgumentException("La tarifa por hora debe ser mayor que cero.");
+        }
+        if (intensidadHoraria < 1 || intensidadHoraria > INTENSIDAD_MAXIMA) {
+            throw new IllegalArgumentException("La intensidad horaria debe estar entre 1 y 168 horas por semana.");
+        }
+        limitarLargo(titulo, LARGO_TITULO, "título");
+        limitarLargo(descripcion, LARGO_TEXTO, "descripción");
+        limitarLargo(experiencia, LARGO_TEXTO, "experiencia");
+        limitarLargo(especialidad, LARGO_ESPECIALIDAD, "especialidad");
     }
 
     private static void limitarLargo(String valor, int maximo, String campo) {
