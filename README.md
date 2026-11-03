@@ -12,6 +12,18 @@ preview main  [here.](https://unimarket-main.onrender.com/)
 
 Requires Java 21.
 
+java -version
+
+Modificar la versión para ArchLinux:
+# Instala Java 21 si no lo tienes
+sudo pacman -S jdk21-openjdk
+
+# Comprueba las versiones disponibles en el sistema
+archlinux-java status
+
+# Configura Java 21 como predeterminado
+sudo archlinux-java set java-21-openjdk
+
 Run:
 
 ```bash
