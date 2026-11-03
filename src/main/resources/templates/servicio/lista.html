@@ -19,9 +19,9 @@
         <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Cerrar aviso"></button>
     </div>
 
-    <form method="get" th:action="@{/servicios}" class="mb-6">
+    <form method="get" th:action="@{/servicios}" class="d-flex flex-wrap align-items-center gap-3 mb-6">
         <label for="orden">Ordenar por</label>
-        <select id="orden" name="orden">
+        <select id="orden" name="orden" class="form-control form-control-sm w-auto">
             <option th:each="o : ${ordenes}" th:value="${o.name()}" th:text="${o.etiqueta}"
                     th:selected="${o == orden}">Más recientes</option>
         </select>
