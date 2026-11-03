@@ -200,6 +200,46 @@ abbr[title="obligatorio"] { color: var(--um-error); text-decoration: none; curso
     .service-rate small { display: inline; }
 }
 
+/* Catalog cards: the title link stretches over the whole card. */
+.service-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: 1rem; margin: 0; padding: 0; list-style: none; }
+.service-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    height: 100%;
+    padding: 1.25rem;
+    border: 1px solid var(--um-line);
+    border-bottom: 4px solid var(--unal-green);
+    border-radius: .75rem;
+    background: var(--um-surface);
+}
+.service-card:hover { background: var(--unal-green-wash); }
+.service-card:has(a:focus-visible) { outline: 2px solid var(--um-focus); outline-offset: 2px; }
+.service-card h2 { margin: 0; font-size: 1.125rem; letter-spacing: -.02em; line-height: 1.25; }
+.service-card a { text-decoration: none; }
+.service-card a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.service-card a:focus-visible { outline: none; }
+.service-card-category {
+    align-self: start;
+    margin: 0;
+    padding: .125rem .625rem;
+    border-radius: 999px;
+    background: var(--unal-green-wash);
+    color: var(--unal-green-deep);
+    font-size: .8125rem;
+    font-weight: 600;
+}
+.service-card:hover .service-card-category { background: var(--bs-primary-bg-muted); }
+.service-card-rate {
+    margin: auto 0 0;
+    padding-top: .75rem;
+    border-top: 1px solid var(--um-line);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.service-card-rate span { color: var(--unal-gray); font-weight: 400; }
+
 .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 1rem; margin: 0; padding: 0; list-style: none; }
 .category-grid a {
     display: flex;

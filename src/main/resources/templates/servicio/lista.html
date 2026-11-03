@@ -28,19 +28,18 @@
         <button type="submit" class="btn-outline theme-primary btn-sm">Aplicar</button>
     </form>
 
-    <section class="panel" th:unless="${#lists.isEmpty(servicios)}" aria-label="Servicios disponibles">
-        <ul class="service-list">
+    <section th:unless="${#lists.isEmpty(servicios)}" aria-label="Servicios disponibles">
+        <ul class="service-cards">
             <li th:each="servicio : ${servicios}">
-                <article class="service-row">
+                <article class="service-card">
+                    <p class="service-card-category" th:text="${servicio.categoria.nombre}">Tutorías</p>
                     <h2><a th:href="@{/servicios/{id}(id=${servicio.id})}" th:text="${servicio.titulo}">Título</a></h2>
                     <p class="service-meta">
-                        <span th:text="${servicio.categoria.nombre}">Tutorías</span>,
-                        <span th:text="${servicio.ofertador.nombre}">Nombre</span>,
+                        <span th:text="${servicio.ofertador.nombre}">Nombre</span> ·
                         <span th:text="${servicio.intensidadHoraria} + ' h por semana'">4 h por semana</span>
                     </p>
-                    <p class="service-rate mb-0">
-                        <data th:value="${servicio.tarifaPorHora}" th:text="${formato.pesos(servicio.tarifaPorHora)}">$25.000 COP</data>
-                        <small>por hora</small>
+                    <p class="service-card-rate">
+                        <data th:value="${servicio.tarifaPorHora}" th:text="${formato.pesos(servicio.tarifaPorHora)}">$25.000 COP</data><span>/hora</span>
                     </p>
                 </article>
             </li>
