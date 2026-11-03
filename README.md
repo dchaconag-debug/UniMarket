@@ -2,6 +2,14 @@
 
 preview main  [here.](https://unimarket-main.onrender.com/)
 
+
+## Cómo descargar y correr el proyecto en local
+
+1. **Clona el repositorio:**
+   ```bash
+   git clone [https://github.com/tu-usuario/unimarket.git](https://github.com/tu-usuario/unimarket.git)
+   cd unimarket
+
 Requires Java 21.
 
 Run:
