@@ -1,16 +1,19 @@
 /* UniMarket theme on top of Bootstrap 6: UNAL green for actions, neutral grays elsewhere. */
 :root {
-    color-scheme: light;
+    color-scheme: light dark;
 
     --unal-green: #94b43b;
-    --unal-green-ink: #4f6420;
-    --unal-green-deep: #3a4a17;
-    --unal-green-wash: #eef3df;
-    --unal-gray: #565a5c;
-    --um-ink: #252a20;
-    --um-line: #d8ddd1;
-    --um-surface: #fff;
-    --um-canvas: #f3f4f2;
+    --unal-green-ink: light-dark(#4f6420, #b5cf70);
+    --unal-green-deep: light-dark(#3a4a17, #d1e59c);
+    --unal-green-wash: light-dark(#eef3df, #2b341d);
+    --unal-gray: light-dark(#565a5c, #b3b9b5);
+    --um-ink: light-dark(#252a20, #e5e7e2);
+    --um-on-green: #252a20;
+    --um-error: light-dark(#9b2c2c, #ffaaa3);
+    --um-focus: light-dark(#565a5c, #b5cf70);
+    --um-line: light-dark(#d8ddd1, #3b4243);
+    --um-surface: light-dark(#fff, #181b1c);
+    --um-canvas: light-dark(#f3f4f2, #202324);
 
     --bs-body-font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     --bs-bg-body: var(--um-canvas);
@@ -22,10 +25,10 @@
     --bs-primary-fg: var(--unal-green-ink);
     --bs-primary-fg-emphasis: var(--unal-green-deep);
     --bs-primary-bg-subtle: var(--unal-green-wash);
-    --bs-primary-bg-muted: #dbe6bd;
-    --bs-primary-border: #667c29;
-    --bs-primary-contrast: var(--um-ink);
-    --bs-primary-focus-ring: var(--unal-gray);
+    --bs-primary-bg-muted: light-dark(#dbe6bd, #3a4724);
+    --bs-primary-border: light-dark(#667c29, #94b43b);
+    --bs-primary-contrast: var(--um-on-green);
+    --bs-primary-focus-ring: var(--um-focus);
 
     --bs-link-color: var(--unal-green-ink);
     --bs-link-hover-color: var(--unal-green-deep);
@@ -36,7 +39,7 @@ h1, h2, h3 { color: var(--um-ink); font-weight: 700; letter-spacing: -.03em; tex
 h1 { font-size: clamp(2rem, 3.5vw, 2.75rem); line-height: 1.1; letter-spacing: -.045em; font-weight: 750; }
 h2 { font-size: 1.25rem; line-height: 1.3; }
 
-:focus-visible { outline: 2px solid var(--unal-gray); outline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--um-focus); outline-offset: 2px; }
 
 /* App header */
 .app-header { background: var(--um-surface); border-bottom: 4px solid var(--unal-green); }
@@ -97,7 +100,7 @@ a.app-brand:hover { color: var(--unal-green-ink); }
 /* Forms */
 .app-form { display: grid; gap: 1.25rem; }
 .app-form label { display: block; font-weight: 600; }
-abbr[title="obligatorio"] { color: #9b2c2c; text-decoration: none; cursor: help; }
+abbr[title="obligatorio"] { color: var(--um-error); text-decoration: none; cursor: help; }
 .form-section {
     display: grid;
     gap: 1.25rem;
@@ -118,11 +121,16 @@ abbr[title="obligatorio"] { color: #9b2c2c; text-decoration: none; cursor: help;
 .app-form .form-field { align-content: start; }
 .form-field .form-text { margin-top: -.25rem; color: var(--unal-gray); }
 .form-control[readonly] { background-color: var(--um-canvas); color: var(--unal-gray); box-shadow: none; }
-.field-error { display: block; color: #9b2c2c; font-size: .875rem; font-weight: 600; }
+.field-error { display: block; color: var(--um-error); font-size: .875rem; font-weight: 600; }
 
 .form-errors h2 { margin-bottom: .5rem; font-size: 1.0625rem; letter-spacing: 0; }
 .form-errors ul { margin: 0; padding-inline-start: 1.25rem; }
-.form-errors:focus { outline: 2px solid #9b2c2c; outline-offset: 2px; }
+.form-errors:focus { outline: 2px solid var(--um-error); outline-offset: 2px; }
+
+/* Bootstrap's select caret needs its dark asset when following the system. */
+@media (prefers-color-scheme: dark) {
+    select.form-control { --bs-control-select-bg: var(--bs-control-select-bg-dark); }
+}
 
 /* One slot per row: day, from, to, remove. Labels are shown only on the first row. */
 .slot { display: grid; grid-template-columns: minmax(9rem, 14rem) repeat(2, minmax(7rem, 9rem)) auto; gap: .75rem; align-items: end; }
@@ -218,7 +226,7 @@ abbr[title="obligatorio"] { color: #9b2c2c; text-decoration: none; cursor: help;
 
 /* The rate is the decision point on a service page, so it gets the green block. */
 .rate-panel { overflow: hidden; padding: 0; }
-.rate-figure { padding: 1.5rem clamp(1.25rem, 3vw, 2rem); background: var(--unal-green); color: var(--um-ink); }
+.rate-figure { padding: 1.5rem clamp(1.25rem, 3vw, 2rem); background: var(--unal-green); color: var(--um-on-green); }
 .rate-figure p { margin: 0; font-size: .9375rem; }
 .rate-figure data { display: block; font-size: clamp(2rem, 4vw, 2.5rem); font-weight: 750; letter-spacing: -.045em; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .rate-panel .facts { padding: 1.5rem clamp(1.25rem, 3vw, 2rem); }
@@ -231,6 +239,7 @@ abbr[title="obligatorio"] { color: #9b2c2c; text-decoration: none; cursor: help;
     padding: clamp(2rem, 5vw, 3.5rem);
     border-radius: 1rem;
     background: var(--unal-green);
-    color: var(--um-ink);
+    color: var(--um-on-green);
 }
+.welcome h1 { color: var(--um-on-green); }
 .welcome p { max-width: 36rem; margin: 1rem 0 0; font-size: 1.125rem; }
