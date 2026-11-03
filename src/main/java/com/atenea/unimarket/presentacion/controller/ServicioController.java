@@ -20,6 +20,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+
+import com.atenea.unimarket.datos.modelo.EstadoServicio;
+import com.atenea.unimarket.negocio.OrdenServicio;
 import com.atenea.unimarket.datos.modelo.Categoria;
 import com.atenea.unimarket.datos.modelo.DiaSemana;
 import com.atenea.unimarket.datos.modelo.Servicio;
@@ -50,6 +53,15 @@ public class ServicioController {
         return DiaSemana.values();
     }
 
+    @GetMapping("/servicios")
+    public String catalogo(@RequestParam(required = false) String orden, Model model) {
+        OrdenServicio seleccionado = OrdenServicio.desde(orden);
+        model.addAttribute("servicios", servicios.disponibles(seleccionado));
+        model.addAttribute("ordenes", OrdenServicio.values());
+        model.addAttribute("orden", seleccionado);
+        model.addAttribute("formato", new FormatoPesos());
+        return "servicio/lista";
+    }
     @GetMapping("/servicios/nuevo")
     public String formulario(Model model) {
         model.addAttribute("servicio", new ServicioFormulario());
@@ -136,13 +148,17 @@ public class ServicioController {
     }
 
     @GetMapping("/servicios/{id}")
-    public String ver(@AuthenticationPrincipal OidcUser oidc, @PathVariable Integer id, Model model) {
+    public String ver(@AuthenticationPrincipal OidcUser oidc, @PathVariable Integer id, Model model, RedirectAttributes redireccion) {
         Servicio servicio = servicios.buscarPorId(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         ZonedDateTime publicacion = servicio.getFechaPublicacion().atZone(PerfilController.ZONA);
         boolean esOfertador = usuarios.buscarPorGoogleSub(oidc.getSubject())
                 .map(usuario -> usuario.getId().equals(servicio.getOfertador().getId()))
                 .orElse(false);
+                if (servicio.getEstado() != EstadoServicio.DISPONIBLE && !esOfertador) {
+                    redireccion.addFlashAttribute("aviso", "Este servicio ya no está disponible.");
+                    return "redirect:/servicios";
+                }
         model.addAttribute("servicio", servicio);
         model.addAttribute("esOfertador", esOfertador);
         model.addAttribute("tarifa", pesos(servicio.getTarifaPorHora()));

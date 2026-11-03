@@ -116,6 +116,10 @@ public class ServicioService {
     public Optional<Categoria> buscarCategoria(Integer id) {
         return categorias.findById(id);
     }
+    @Transactional(readOnly = true)
+    public List<Servicio> disponibles(OrdenServicio orden) {
+        return servicios.findByEstado(EstadoServicio.DISPONIBLE, orden.getSort());
+    }
 
     private static String obligatorio(String valor, String campo) {
         String limpio = opcional(valor);
