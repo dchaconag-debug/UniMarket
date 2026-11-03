@@ -3,6 +3,7 @@ package com.atenea.unimarket.datos.repositorio;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Sort;
 
 import com.atenea.unimarket.datos.modelo.EstadoServicio;
 import com.atenea.unimarket.datos.modelo.Servicio;
