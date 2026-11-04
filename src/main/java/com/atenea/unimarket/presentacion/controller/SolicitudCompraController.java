@@ -2,6 +2,7 @@ package com.atenea.unimarket.presentacion.controller;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
 
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.atenea.unimarket.datos.modelo.EstadoServicio;
 import com.atenea.unimarket.datos.modelo.EstadoSolicitud;
+import com.atenea.unimarket.datos.modelo.Propuesta;
 import com.atenea.unimarket.datos.modelo.Servicio;
 import com.atenea.unimarket.datos.modelo.SolicitudCompra;
 import com.atenea.unimarket.datos.modelo.Usuario;
