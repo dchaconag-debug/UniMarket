@@ -74,15 +74,86 @@ public class SolicitudCompraService {
         return solicitud;
     }
 
-    /** COMPRA-CLI-H02: the other party answers with a new rate (and weekly hours if offerer). */
-    public SolicitudCompra contraproponer(Integer solicitudId, Integer usuarioId, Integer tarifaPorHora,
-            Integer intensidadHoraria) {
-        throw new UnsupportedOperationException("Pendiente: COMPRA-CLI-H02");
+    /** COMPRA-CLI-H02: la contraparte responde con una nueva tarifa (y horas semanales si es ofertador). */
+    @Transactional
+    public SolicitudCompra contraproponer(Integer solicitudId, Integer usuarioId, Integer tarifaPorHora, Integer intensidadHoraria) {
+        SolicitudCompra solicitud = solicitudes.findById(solicitudId)
+            .orElseThrow(SolicitudNoEncontradaException::new);
+
+        if (solicitud.getEstado() != EstadoSolicitud.NEGOCIANDO) {
+            throw new SolicitudNoPermitidaException("La solicitud no se encuentra en negociación.");
+        }
+
+        // Obtener la propuesta vigente (la última ronda)
+        Propuesta ultimaPropuesta = propuestas.findFirstBySolicitudIdOrderByNumeroRondaDesc(solicitudId)
+                .orElseThrow(() -> new IllegalStateException("La solicitud no contiene propuestas previas."));
+
+        // Regla de turnos: solo la contraparte puede responder
+        if (ultimaPropuesta.getAutor().getId().equals(usuarioId)) {
+            throw new SolicitudNoPermitidaException("Debes esperar la respuesta de la otra persona antes de contraproponer.");
+        }
+
+        Usuario autor = usuarios.findById(usuarioId)
+                .orElseThrow(() -> new IllegalArgumentException("El usuario no existe."));
+
+        boolean esCliente = solicitud.getCliente().getId().equals(usuarioId);
+
+        // Si la tarifa enviada es nula, mantiene la de la última propuesta
+        int tarifa = tarifaPorHora != null ? tarifaPorHora : ultimaPropuesta.getTarifaPorHora();
+
+        // El cliente no modifica la intensidad horaria; solo el ofertador puede cambiarla
+        int intensidad = esCliente 
+                ? ultimaPropuesta.getIntensidadHoraria() 
+                : (intensidadHoraria != null ? intensidadHoraria : ultimaPropuesta.getIntensidadHoraria());
+
+        Instant ahora = Instant.now(reloj);
+
+        // Crear la nueva propuesta incrementando el número de ronda
+        Propuesta nuevaPropuesta = new Propuesta(
+                solicitud,
+                autor,
+                tarifa,
+                intensidad,
+                ultimaPropuesta.getNumeroRonda() + 1,
+                ahora
+        );
+        propuestas.save(nuevaPropuesta);
+
+        // Actualizar la última fecha de movimiento en la solicitud
+        solicitud.registrarActividad(ahora);
+        return solicitudes.save(solicitud);
     }
 
-    /** The counterpart accepts the current proposal: the request becomes ACTIVA. */
+    /** La contraparte acepta la propuesta vigente: la solicitud y el servicio pasan a estar ACTIVA/ACTIVO. */
+    @Transactional
     public SolicitudCompra aceptar(Integer solicitudId, Integer usuarioId) {
-        throw new UnsupportedOperationException("Pendiente: COMPRA-CLI-H02");
+        SolicitudCompra solicitud = solicitudes.findById(solicitudId)
+                .orElseThrow(SolicitudNoEncontradaException::new);
+
+        if (solicitud.getEstado() != EstadoSolicitud.NEGOCIANDO) {
+            throw new SolicitudNoPermitidaException("La solicitud no se encuentra en negociación.");
+        }
+
+        Propuesta ultimaPropuesta = propuestas.findFirstBySolicitudIdOrderByNumeroRondaDesc(solicitudId)
+                .orElseThrow(() -> new IllegalStateException("La solicitud no contiene propuestas previas."));
+
+        // No puedes aceptar tu propia propuesta
+        if (ultimaPropuesta.getAutor().getId().equals(usuarioId)) {
+            throw new SolicitudNoPermitidaException("No puedes aceptar tu propia propuesta.");
+        }
+
+        Instant ahora = Instant.now(reloj);
+
+        // Cambiar la solicitud a activa
+        solicitud.activar(ahora);
+        solicitudes.save(solicitud);
+
+        // Cambiar el servicio a activo (ocupado/contratado)
+        Servicio servicio = solicitud.getServicio();
+        servicio.activar();
+        servicios.save(servicio);
+
+        return solicitud;
     }
 
     /**
