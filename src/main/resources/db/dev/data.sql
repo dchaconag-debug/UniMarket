@@ -1,9 +1,8 @@
--- Datos de demostración para el catálogo y la sustentación.
--- Los usuarios llevan google_sub ficticio: no pueden iniciar sesión.
+-- Fixtures loaded only by the dev profile, outside Flyway migration history.
 INSERT INTO usuario (google_sub, nombre, correo_institucional, fecha_creacion) VALUES
-    ('demo-ana',    'Ana Rodríguez', 'ana.demo@unimarket.invalid',    '2026-09-01 08:00:00'),
-    ('demo-carlos', 'Carlos Gómez',  'carlos.demo@unimarket.invalid', '2026-09-01 08:05:00'),
-    ('demo-laura',  'Laura Pérez',   'laura.demo@unimarket.invalid',  '2026-09-01 08:10:00');
+    ('demo-ana',    'Ana Rodríguez', 'ana.demo@unal.edu.co',    '2026-09-01 08:00:00'),
+    ('demo-carlos', 'Carlos Gómez',  'carlos.demo@unal.edu.co', '2026-09-01 08:05:00'),
+    ('demo-laura',  'Laura Pérez',   'laura.demo@unal.edu.co',  '2026-09-01 08:10:00');
 
 INSERT INTO perfil (usuario_id, telefono_contacto, horarios_disponibilidad, fecha_creacion, fecha_actualizacion)
 SELECT id, '3001234567', '[{"dia":"LUNES","inicio":"14:00","fin":"18:00"}]',
