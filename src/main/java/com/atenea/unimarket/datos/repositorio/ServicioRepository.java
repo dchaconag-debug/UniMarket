@@ -4,11 +4,12 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import com.atenea.unimarket.datos.modelo.EstadoServicio;
 import com.atenea.unimarket.datos.modelo.Servicio;
 
-public interface ServicioRepository extends JpaRepository<Servicio, Integer> {
+public interface ServicioRepository extends JpaRepository<Servicio, Integer> , JpaSpecificationExecutor<Servicio>{
 
     List<Servicio> findByCategoriaIdAndEstadoOrderByFechaPublicacionAsc(Integer categoriaId, EstadoServicio estado);
 

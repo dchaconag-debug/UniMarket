@@ -18,15 +18,30 @@
         <p th:text="${aviso}">Este servicio ya no está disponible.</p>
         <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Cerrar aviso"></button>
     </div>
-
-    <form method="get" th:action="@{/servicios}" class="d-flex flex-wrap align-items-center gap-3 mb-6">
-        <label for="orden">Ordenar por</label>
-        <select id="orden" name="orden" class="form-control form-control-sm w-auto">
-            <option th:each="o : ${ordenes}" th:value="${o.name()}" th:text="${o.etiqueta}"
-                    th:selected="${o == orden}">Más recientes</option>
-        </select>
-        <button type="submit" class="btn-outline theme-primary btn-sm">Aplicar</button>
-    </form>
+        <form method="get" th:action="@{/servicios}" class="panel mb-6">
+            <div>
+                <label for="q">Buscar</label>
+                <input type="search" id="q" name="q" th:value="${q}" maxlength="100"
+                    placeholder="Palabra clave, título o nombre del ofertador">
+            </div>
+            <fieldset>
+                <legend>Categorías</legend>
+                <label th:each="c : ${categorias}">
+                    <input type="checkbox" name="categoria" th:value="${c.id}"
+                        th:checked="${categoriasSeleccionadas.contains(c.id)}">
+                    <span th:text="${c.nombre}">Tutorías</span>
+                </label>
+            </fieldset>
+            <div>
+                <label for="orden">Ordenar por</label>
+                <select id="orden" name="orden">
+                    <option th:each="o : ${ordenes}" th:value="${o.name()}" th:text="${o.etiqueta}"
+                            th:selected="${o == orden}">Más recientes</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-solid theme-primary">Buscar</button>
+            <a th:if="${hayFiltros}" th:href="@{/servicios}" class="btn-text theme-secondary">Quitar filtros</a>
+        </form>
 
     <section th:unless="${#lists.isEmpty(servicios)}" aria-label="Servicios disponibles">
         <ul class="service-cards">
@@ -46,8 +61,13 @@
         </ul>
     </section>
     <div th:if="${#lists.isEmpty(servicios)}" class="panel">
-        <p class="empty-note">Aún no hay servicios disponibles.</p>
-        <a th:href="@{/servicios/nuevo}" class="btn-solid theme-primary">Publicar un servicio</a>
+        <th:block th:if="${hayFiltros}">
+            <p class="empty-note">No encontramos servicios con esos criterios. Prueba con otras palabras o quita algunos filtros.</p>
+        </th:block>
+        <th:block th:unless="${hayFiltros}">
+            <p class="empty-note">Aún no hay servicios disponibles.</p>
+            <a th:href="@{/servicios/nuevo}" class="btn-solid theme-primary">Publicar un servicio</a>
+        </th:block>
     </div>
 </main>
 <script th:replace="~{fragmentos/bootstrap :: scripts}"></script>

@@ -87,7 +87,7 @@ Actor: cliente. E2 pp. 15-16, 29-30.
 - Si el servicio deja de estar disponible durante la consulta, informar y regresar al listado.
 - Desde el detalle, permitir guardarlo en la colección del cliente y confirmar la acción.
 
-Falta precisar cómo representar el nombre de negocio, que forma parte de la búsqueda pero no tiene entidad propia en el modelo.
+La búsqueda por palabra clave o nombre cubre título, descripción, especialidad, experiencia y nombre del ofertador. No existe entidad de negocio. La comparación ignora mayúsculas solo en letras sin tilde, por una limitación de SQLite.
 
 Historias: `BUSQUEDA-CLI-H01` consultar catálogo y detalle; `BUSQUEDA-CLI-H02` buscar; `BUSQUEDA-CLI-H03` guardar.
 

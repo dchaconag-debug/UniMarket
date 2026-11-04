@@ -4,6 +4,7 @@ import java.text.NumberFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -52,8 +53,9 @@ public class ServicioController {
     DiaSemana[] dias() {
         return DiaSemana.values();
     }
-
+    /* 
     @GetMapping("/servicios")
+  
     public String catalogo(@RequestParam(required = false) String orden, Model model) {
         OrdenServicio seleccionado = OrdenServicio.desde(orden);
         model.addAttribute("servicios", servicios.disponibles(seleccionado));
@@ -62,6 +64,26 @@ public class ServicioController {
         model.addAttribute("formato", new FormatoPesos());
         return "servicio/lista";
     }
+    CATALOGO ANTIGUO    */ 
+
+        @GetMapping("/servicios")
+    public String catalogo(@RequestParam(required = false) String orden,
+            @RequestParam(name = "categoria", required = false) List<Integer> categoriaIds,
+            @RequestParam(name = "q", required = false) String texto, Model model) {
+        OrdenServicio seleccionado = OrdenServicio.desde(orden);
+        List<Integer> seleccionadas = categoriaIds == null ? List.of() : categoriaIds;
+        String busqueda = texto == null ? "" : texto.strip();
+        model.addAttribute("servicios", servicios.buscarDisponibles(seleccionadas, busqueda, seleccionado));
+        model.addAttribute("categorias", servicios.categorias());
+        model.addAttribute("categoriasSeleccionadas", seleccionadas);
+        model.addAttribute("q", busqueda);
+        model.addAttribute("hayFiltros", !seleccionadas.isEmpty() || !busqueda.isEmpty());
+        model.addAttribute("ordenes", OrdenServicio.values());
+        model.addAttribute("orden", seleccionado);
+        model.addAttribute("formato", new FormatoPesos());
+        return "servicio/lista";
+    }
+
     @GetMapping("/servicios/nuevo")
     public String formulario(Model model) {
         model.addAttribute("servicio", new ServicioFormulario());
