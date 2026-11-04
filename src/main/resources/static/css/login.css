@@ -17,11 +17,11 @@
     min-height: 36rem;
     padding: clamp(2rem, 4vw, 4rem);
     background: var(--unal-green);
-    color: var(--um-ink);
+    color: var(--um-on-green);
 }
 
 .brand-name { font-size: 1.6rem; font-weight: 750; letter-spacing: -.06em; }
-.campus-message h1 { color: var(--um-ink); font-size: clamp(2.4rem, 4vw, 3.6rem); line-height: 1.08; letter-spacing: -.045em; font-weight: 750; }
+.campus-message h1 { color: var(--um-on-green); font-size: clamp(2.4rem, 4vw, 3.6rem); line-height: 1.08; letter-spacing: -.045em; font-weight: 750; }
 .campus-message p { max-width: 28rem; margin-block: 1.5rem 2rem; font-size: 1.125rem; }
 .campus-signature { font-size: .9rem; }
 .login-panel { padding: clamp(1.5rem, 3vw, 3rem); }

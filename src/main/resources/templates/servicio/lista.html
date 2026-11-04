@@ -19,28 +19,27 @@
         <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Cerrar aviso"></button>
     </div>
 
-    <form method="get" th:action="@{/servicios}" class="mb-6">
+    <form method="get" th:action="@{/servicios}" class="d-flex flex-wrap align-items-center gap-3 mb-6">
         <label for="orden">Ordenar por</label>
-        <select id="orden" name="orden">
+        <select id="orden" name="orden" class="form-control form-control-sm w-auto">
             <option th:each="o : ${ordenes}" th:value="${o.name()}" th:text="${o.etiqueta}"
                     th:selected="${o == orden}">Más recientes</option>
         </select>
         <button type="submit" class="btn-outline theme-primary btn-sm">Aplicar</button>
     </form>
 
-    <section class="panel" th:unless="${#lists.isEmpty(servicios)}" aria-label="Servicios disponibles">
-        <ul class="service-list">
+    <section th:unless="${#lists.isEmpty(servicios)}" aria-label="Servicios disponibles">
+        <ul class="service-cards">
             <li th:each="servicio : ${servicios}">
-                <article class="service-row">
+                <article class="service-card">
+                    <p class="service-card-category" th:text="${servicio.categoria.nombre}">Tutorías</p>
                     <h2><a th:href="@{/servicios/{id}(id=${servicio.id})}" th:text="${servicio.titulo}">Título</a></h2>
                     <p class="service-meta">
-                        <span th:text="${servicio.categoria.nombre}">Tutorías</span>,
-                        <span th:text="${servicio.ofertador.nombre}">Nombre</span>,
+                        <span th:text="${servicio.ofertador.nombre}">Nombre</span> ·
                         <span th:text="${servicio.intensidadHoraria} + ' h por semana'">4 h por semana</span>
                     </p>
-                    <p class="service-rate mb-0">
-                        <data th:value="${servicio.tarifaPorHora}" th:text="${formato.pesos(servicio.tarifaPorHora)}">$25.000 COP</data>
-                        <small>por hora</small>
+                    <p class="service-card-rate">
+                        <data th:value="${servicio.tarifaPorHora}" th:text="${formato.pesos(servicio.tarifaPorHora)}">$25.000 COP</data><span>/hora</span>
                     </p>
                 </article>
             </li>
