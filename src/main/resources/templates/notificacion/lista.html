@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Notificaciones | UniMarket</title>
+    <link th:replace="~{fragmentos/bootstrap :: styles}">
+</head>
+<body>
+<header th:replace="~{fragmentos/encabezado :: encabezado('notificaciones')}"></header>
+<main class="container app-main">
+    <div class="page-head">
+        <h1>Notificaciones</h1>
+        <p>Novedades de tus solicitudes de compra.</p>
+    </div>
+
+    <section class="panel" th:unless="${#lists.isEmpty(notificaciones)}" aria-label="Notificaciones">
+        <ul class="service-list">
+            <li th:each="notificacion : ${notificaciones}">
+                <article class="service-row">
+                    <h2 th:text="${notificacion.mensaje}">Mensaje</h2>
+                    <p class="service-meta">
+                        <time th:text="${fecha.texto(notificacion.fechaCreacion)}">3 de noviembre de 2026, 12:00</time>,
+                        <a th:href="@{/solicitudes/{id}(id=${notificacion.solicitud.id})}">Ver solicitud</a>
+                    </p>
+                </article>
+            </li>
+        </ul>
+    </section>
+
+    <section class="panel" th:if="${#lists.isEmpty(notificaciones)}">
+        <p class="mb-0">Todavía no tienes notificaciones.</p>
+    </section>
+</main>
+<script th:replace="~{fragmentos/bootstrap :: scripts}"></script>
+</body>
+</html>

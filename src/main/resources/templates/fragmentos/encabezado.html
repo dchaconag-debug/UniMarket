@@ -14,6 +14,8 @@
                        th:attr="aria-current=${seccion == 'categorias'} ? 'page' : null">Categorías</a></li>
                 <li><a th:href="@{/servicios/nuevo}"
                        th:attr="aria-current=${seccion == 'publicar'} ? 'page' : null">Publicar servicio</a></li>
+                <li><a th:href="@{/notificaciones}"
+                       th:attr="aria-current=${seccion == 'notificaciones'} ? 'page' : null">Notificaciones</a></li>
                 <li><a th:href="@{/perfil}"
                        th:attr="aria-current=${seccion == 'perfil'} ? 'page' : null">Mi perfil</a></li>
             </ul>
