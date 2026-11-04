@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="'Solicitar ' + ${servicio.titulo} + ' | UniMarket'">Solicitar servicio | UniMarket</title>
+    <link th:replace="~{fragmentos/bootstrap :: styles}">
+</head>
+<body>
+<header th:replace="~{fragmentos/encabezado :: encabezado('catalogo')}"></header>
+<main class="container app-main">
+    <div class="page-form">
+        <div class="page-head">
+            <h1>Solicitar servicio</h1>
+            <p>Revisa las condiciones publicadas antes de enviar tu solicitud.</p>
+        </div>
+
+        <section class="panel" aria-labelledby="condiciones">
+            <h2 id="condiciones" th:text="${servicio.titulo}">Título</h2>
+            <dl class="facts">
+                <div>
+                    <dt>Ofertador</dt>
+                    <dd th:text="${servicio.ofertador.nombre}">Nombre</dd>
+                </div>
+                <div>
+                    <dt>Tarifa publicada</dt>
+                    <dd th:text="${tarifaPublicada} + ' por hora'">$25.000 COP por hora</dd>
+                </div>
+                <div>
+                    <dt>Intensidad horaria</dt>
+                    <dd th:text="${servicio.intensidadHoraria} + ' horas por semana'">4 horas por semana</dd>
+                </div>
+            </dl>
+        </section>
+
+        <form th:action="@{/servicios/{id}/solicitar(id=${servicio.id})}" th:object="${solicitud}" method="post" novalidate class="app-form">
+            <div th:if="${#fields.hasErrors('*')}" role="alert" id="resumen-errores" tabindex="-1"
+                 class="alert theme-danger form-errors">
+                <div>
+                    <h2>Revisa tu solicitud</h2>
+                    <ul>
+                        <li th:each="error : ${#fields.allErrors()}" th:text="${error}">Error</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <fieldset class="form-section">
+                    <legend>Tu propuesta</legend>
+                    <p>
+                        Al enviar aceptas la intensidad horaria publicada. Si dejas la tarifa publicada,
+                        aceptas las condiciones tal como están; si la cambias, propones esa tarifa al ofertador.
+                    </p>
+                    <div class="row g-5">
+                        <div class="col-12 md:col-6 form-field">
+                            <label for="tarifaPorHora">Tarifa por hora</label>
+                            <div class="input-group">
+                                <span class="input-group-text" aria-hidden="true">$</span>
+                                <input type="number" th:field="*{tarifaPorHora}" id="tarifaPorHora" class="form-control" min="1" step="1"
+                                       inputmode="numeric" required aria-describedby="tarifaPorHora-unidad"
+                                       th:classappend="${#fields.hasErrors('tarifaPorHora')} ? 'is-invalid'"
+                                       th:attr="aria-invalid=${#fields.hasErrors('tarifaPorHora')},
+                                                aria-errormessage=${#fields.hasErrors('tarifaPorHora')} ? 'tarifaPorHora-error' : null">
+                                <span class="input-group-text" id="tarifaPorHora-unidad">
+                                    <abbr title="pesos colombianos">COP</abbr>
+                                </span>
+                            </div>
+                            <strong th:if="${#fields.hasErrors('tarifaPorHora')}" id="tarifaPorHora-error" class="field-error"
+                                    th:errors="*{tarifaPorHora}">Error</strong>
+                        </div>
+                    </div>
+                </fieldset>
+                <div class="form-actions">
+                    <button type="submit" class="btn-solid theme-primary">Enviar solicitud</button>
+                    <a th:href="@{/servicios/{id}(id=${servicio.id})}" class="btn-outline theme-primary">Cancelar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</main>
+<script th:replace="~{fragmentos/bootstrap :: scripts}"></script>
+</body>
+</html>

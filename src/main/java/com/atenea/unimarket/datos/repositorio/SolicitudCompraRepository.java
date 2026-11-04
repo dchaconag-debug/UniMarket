@@ -10,4 +10,6 @@ import com.atenea.unimarket.datos.modelo.SolicitudCompra;
 public interface SolicitudCompraRepository extends JpaRepository<SolicitudCompra, Integer> {
 
     boolean existsByServicioIdAndEstadoIn(Integer servicioId, Collection<EstadoSolicitud> estados);
+
+    boolean existsByClienteIdAndServicioIdAndEstado(Integer clienteId, Integer servicioId, EstadoSolicitud estado);
 }
