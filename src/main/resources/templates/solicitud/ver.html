@@ -76,6 +76,45 @@
             </table>
         </section>
 
+<!-- SECCIÓN DE RESPUESTA Y NEGOCIACIÓN (COMPRA-CLI-H02) -->
+        <section th:if="${esMiTurno}" class="panel mt-6" aria-labelledby="negociacion">
+            <h2 id="negociacion">Responder a la propuesta</h2>
+            
+            <!-- 1. Botón Aceptar -->
+            <form th:action="@{/solicitudes/{id}/aceptar(id=${solicitud.id})}" method="post" class="mb-6">
+                <p class="text-muted">Si estás de acuerdo con la tarifa y la intensidad horaria vigentes, puedes cerrar el acuerdo:</p>
+                <button type="submit" class="btn btn-success fw-bold">
+                    ✓ Aceptar propuesta vigente
+                </button>
+            </form>
+
+            <hr class="my-6">
+
+            <!-- 2. Formulario Contraproponer -->
+            <form th:action="@{/solicitudes/{id}/contraproponer(id=${solicitud.id})}" method="post">
+                <h3 class="h5 mb-4">Enviar nueva contrapropuesta</h3>
+                
+                <div class="mb-4">
+                    <label for="tarifaPorHora" class="form-label">Nueva tarifa por hora (COP):</label>
+                    <input type="number" id="tarifaPorHora" name="tarifaPorHora" class="form-control" placeholder="Ej: 25000" min="1">
+                </div>
+
+                <div class="mb-4" th:if="${!esCliente}">
+                    <label for="intensidadHoraria" class="form-label">Nuevas horas semanales:</label>
+                    <input type="number" id="intensidadHoraria" name="intensidadHoraria" class="form-control" placeholder="Ej: 4" min="1" max="168">
+                </div>
+
+                <button type="submit" class="btn-outline">
+                    Enviar contrapropuesta
+                </button>
+            </form>
+        </section>
+
+        <!-- Mensaje cuando no es tu turno -->
+        <div th:if="${solicitud.estado.name() == 'NEGOCIANDO' and !esMiTurno}" class="alert theme-warning mt-6" role="status">
+            <p><strong>Esperando respuesta:</strong> Has enviado tu propuesta. Debes esperar a que la otra persona responda o acepte.</p>
+        </div>
+
         <form th:if="${puedeRechazar}" th:action="@{/solicitudes/{id}/rechazar(id=${solicitud.id})}" method="post" class="mt-6">
             <button type="submit" class="btn-outline theme-danger">Rechazar solicitud</button>
         </form>
