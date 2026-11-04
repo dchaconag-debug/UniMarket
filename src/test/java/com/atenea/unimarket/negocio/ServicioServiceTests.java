@@ -54,6 +54,23 @@ class ServicioServiceTests {
     }
 
     @Test
+    void catalogoOrdenaPorFechaAscendentePorDefectoYPermiteMasRecientes() {
+        Servicio reciente = servicio.publicar(anaId, datos(25000, 4));
+        Servicio antiguo = servicio.publicar(anaId, datos(25000, 4));
+        jdbc.update("UPDATE servicio SET fecha_publicacion = ? WHERE id = ?",
+                "2026-02-01 10:00:00", reciente.getId());
+        jdbc.update("UPDATE servicio SET fecha_publicacion = ? WHERE id = ?",
+                "2026-01-01 10:00:00", antiguo.getId());
+
+        for (String orden : new String[] {null, "", "desconocido", "ANTIGUOS"}) {
+            assertThat(servicio.buscarDisponibles(List.of(), null, OrdenServicio.desde(orden)))
+                    .extracting(Servicio::getId).containsExactly(antiguo.getId(), reciente.getId());
+        }
+        assertThat(servicio.buscarDisponibles(List.of(), null, OrdenServicio.desde("RECIENTES")))
+                .extracting(Servicio::getId).containsExactly(reciente.getId(), antiguo.getId());
+    }
+
+    @Test
     void lasCategoriasVienenDeLaMigracion() {
         assertThat(servicio.categorias()).extracting(Categoria::getNombre).containsExactly(
                 "Asesoría de tesis y trabajos", "Clases particulares", "Diseño", "Escritura", "Tutorías");

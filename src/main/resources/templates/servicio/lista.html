@@ -36,7 +36,7 @@
                 <label for="orden">Ordenar por</label>
                 <select id="orden" name="orden">
                     <option th:each="o : ${ordenes}" th:value="${o.name()}" th:text="${o.etiqueta}"
-                            th:selected="${o == orden}">Más recientes</option>
+                            th:selected="${o == orden}">Más antiguos</option>
                 </select>
             </div>
             <button type="submit" class="btn-solid theme-primary">Buscar</button>
