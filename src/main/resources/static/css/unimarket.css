@@ -201,6 +201,38 @@ abbr[title="obligatorio"] { color: var(--um-error); text-decoration: none; curso
     .service-rate small { display: inline; }
 }
 
+/* Catalog filters: search bar, category chips (extra ones behind "Ver todas") and a results header. */
+.catalog-filters { display: grid; gap: 1rem; margin-bottom: 1.5rem; }
+.catalog-search { display: flex; gap: .75rem; }
+.catalog-search .form-control { flex: 1; min-width: 0; }
+.catalog-chips { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0; padding: 0; border: 0; }
+.catalog-chips details, .catalog-chips details::details-content { display: contents; }
+.catalog-chips details[open] > summary { display: none; }
+.chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: .375rem;
+    padding: .375rem .75rem;
+    border: 1px solid var(--um-line);
+    border-radius: 999px;
+    background: var(--um-surface);
+    font-size: .875rem;
+    cursor: pointer;
+    user-select: none;
+}
+.chip:hover { border-color: var(--bs-primary-border); }
+.chip input { position: absolute; opacity: 0; pointer-events: none; }
+.chip:has(input:checked) { border-color: var(--bs-primary-border); background: var(--unal-green-wash); color: var(--unal-green-deep); font-weight: 600; }
+.chip:has(input:checked)::before { content: "✓"; }
+.chip:has(input:focus-visible) { outline: 2px solid var(--um-focus); outline-offset: 2px; }
+.chip-more { border-style: dashed; color: var(--unal-green-ink); font-weight: 600; list-style: none; }
+.chip-more::-webkit-details-marker { display: none; }
+.catalog-results-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .75rem 1.5rem; margin-bottom: 1rem; color: var(--unal-gray); }
+.catalog-results-head strong { color: var(--um-ink); }
+.catalog-results-head a { margin-inline-start: .5rem; font-weight: 600; }
+.catalog-sort { display: flex; align-items: center; gap: .5rem; }
+
 /* Catalog cards: the title link stretches over the whole card. */
 .service-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: 1rem; margin: 0; padding: 0; list-style: none; }
 .service-card {

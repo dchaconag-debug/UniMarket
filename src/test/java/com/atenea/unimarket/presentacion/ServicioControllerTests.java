@@ -213,6 +213,16 @@ class ServicioControllerTests {
     }
 
     @Test
+    void catalogoMuestraPrimeroLasCategoriasSeleccionadas() throws Exception {
+        String html = mvc.perform(get("/servicios").param("categoria", tutoriasId.toString()).with(ana()))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("Ver todas"))))
+                .andReturn().getResponse().getContentAsString();
+        assertThat(html.indexOf("Tutorías</span>")).isLessThan(html.indexOf("Asesoría de tesis y trabajos</span>"));
+        assertThat(html).contains("0 servicios").contains("Quitar filtros");
+    }
+
+    @Test
     void categoriasYServicioInexistente() throws Exception {
         mvc.perform(get("/categorias").with(ana()))
                 .andExpect(status().isOk())
