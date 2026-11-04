@@ -37,7 +37,7 @@
                         <form th:if="${devAccounts != null}" th:action="@{/dev/login}" method="post">
                             <p class="alert theme-warning">Modo desarrollo. Elige una identidad simulada.</p>
                             <label for="dev-account" class="form-label">Cuenta de prueba</label>
-                            <select id="dev-account" name="subject" class="form-select mb-3">
+                            <select id="dev-account" name="subject" class="form-control mb-3">
                                 <option th:each="account : ${devAccounts}" th:value="${account.subject}"
                                         th:text="${account.name}"></option>
                             </select>

@@ -91,11 +91,12 @@ a.app-brand:hover { color: var(--unal-green-ink); }
     border-radius: .75rem;
     background: var(--um-surface);
 }
-.panel + .panel { margin-top: 1.25rem; }
+.panel + .panel, .panel + .app-form { margin-top: 1.25rem; }
 .panel > h2 { margin-bottom: 1rem; }
+.panel > .table { margin-bottom: 0; }
 
 .empty-note { color: var(--unal-gray); }
-.prose { max-width: 68ch; white-space: pre-line; }
+.prose { max-width: 68ch; margin-inline: 0; white-space: pre-line; }
 
 /* Forms */
 .app-form { display: grid; gap: 1.25rem; }
@@ -201,7 +202,7 @@ abbr[title="obligatorio"] { color: var(--um-error); text-decoration: none; curso
 }
 
 /* Catalog cards: the title link stretches over the whole card. */
-.service-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: 1rem; margin: 0; padding: 0; list-style: none; }
+.service-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: 1rem; margin: 0; padding: 0; list-style: none; }
 .service-card {
     position: relative;
     display: flex;
@@ -270,7 +271,7 @@ abbr[title="obligatorio"] { color: var(--um-error); text-decoration: none; curso
 .rate-figure p { margin: 0; font-size: .9375rem; }
 .rate-figure data { display: block; font-size: clamp(2rem, 4vw, 2.5rem); font-weight: 750; letter-spacing: -.045em; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .rate-panel .facts { padding: 1.5rem clamp(1.25rem, 3vw, 2rem); }
-.rate-panel .btn-outline { margin: 0 clamp(1.25rem, 3vw, 2rem) 1.5rem; }
+.rate-actions { display: flex; flex-wrap: wrap; gap: .75rem; padding: 0 clamp(1.25rem, 3vw, 2rem) 1.5rem; }
 
 .byline { margin: .75rem 0 0; color: var(--unal-gray); }
 
