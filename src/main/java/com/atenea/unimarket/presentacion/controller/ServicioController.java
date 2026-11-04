@@ -3,6 +3,8 @@ package com.atenea.unimarket.presentacion.controller;
 import java.text.NumberFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Locale;
 import java.util.List;
 
@@ -41,6 +43,8 @@ public class ServicioController {
     private static final Locale COLOMBIA = Locale.forLanguageTag("es-CO");
     private static final DateTimeFormatter FECHA = DateTimeFormatter.ofPattern("d 'de' MMMM 'de' yyyy", COLOMBIA);
 
+    private static final int CATEGORIAS_VISIBLES = 10;
+
     private final ServicioService servicios;
     private final UsuarioService usuarios;
 
@@ -53,20 +57,7 @@ public class ServicioController {
     DiaSemana[] dias() {
         return DiaSemana.values();
     }
-    /* 
     @GetMapping("/servicios")
-  
-    public String catalogo(@RequestParam(required = false) String orden, Model model) {
-        OrdenServicio seleccionado = OrdenServicio.desde(orden);
-        model.addAttribute("servicios", servicios.disponibles(seleccionado));
-        model.addAttribute("ordenes", OrdenServicio.values());
-        model.addAttribute("orden", seleccionado);
-        model.addAttribute("formato", new FormatoPesos());
-        return "servicio/lista";
-    }
-    CATALOGO ANTIGUO    */ 
-
-        @GetMapping("/servicios")
     public String catalogo(@RequestParam(required = false) String orden,
             @RequestParam(name = "categoria", required = false) List<Integer> categoriaIds,
             @RequestParam(name = "q", required = false) String texto, Model model) {
@@ -74,7 +65,7 @@ public class ServicioController {
         List<Integer> seleccionadas = categoriaIds == null ? List.of() : categoriaIds;
         String busqueda = texto == null ? "" : texto.strip();
         model.addAttribute("servicios", servicios.buscarDisponibles(seleccionadas, busqueda, seleccionado));
-        model.addAttribute("categorias", servicios.categorias());
+        agregarChipsDeCategorias(model, servicios.categorias(), seleccionadas);
         model.addAttribute("categoriasSeleccionadas", seleccionadas);
         model.addAttribute("q", busqueda);
         model.addAttribute("hayFiltros", !seleccionadas.isEmpty() || !busqueda.isEmpty());
@@ -82,6 +73,16 @@ public class ServicioController {
         model.addAttribute("orden", seleccionado);
         model.addAttribute("formato", new FormatoPesos());
         return "servicio/lista";
+    }
+
+    /** Selected categories come first so they are never hidden behind "Ver todas". */
+    private static void agregarChipsDeCategorias(Model model, List<Categoria> categorias, List<Integer> seleccionadas) {
+        List<Categoria> ordenadas = new ArrayList<>(categorias);
+        ordenadas.sort(Comparator.comparing(c -> !seleccionadas.contains(c.getId())));
+        int visibles = Math.max(CATEGORIAS_VISIBLES, (int) ordenadas.stream().filter(c -> seleccionadas.contains(c.getId())).count());
+        visibles = Math.min(visibles, ordenadas.size());
+        model.addAttribute("categoriasVisibles", ordenadas.subList(0, visibles));
+        model.addAttribute("categoriasOcultas", ordenadas.subList(visibles, ordenadas.size()));
     }
 
     @GetMapping("/servicios/nuevo")

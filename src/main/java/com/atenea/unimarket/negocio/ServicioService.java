@@ -8,8 +8,6 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Locale;
-
 import org.springframework.data.jpa.domain.Specification;
 
 import jakarta.persistence.criteria.Join;
@@ -127,7 +125,7 @@ public class ServicioService {
         return servicios.findByEstado(EstadoServicio.DISPONIBLE, orden.getSort());
     }
 
-        @Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public List<Servicio> buscarDisponibles(List<Integer> categoriaIds, String texto, OrdenServicio orden) {
         Specification<Servicio> criterios = (servicio, consulta, cb) ->
                 cb.equal(servicio.get("estado"), EstadoServicio.DISPONIBLE);
@@ -137,15 +135,15 @@ public class ServicioService {
         }
         String limpio = opcional(texto);
         if (limpio != null) {
-            String patron = "%" + escaparLike(limpio.toLowerCase(Locale.ROOT)) + "%";
+            String patron = "%" + escaparLike(limpio) + "%";
             criterios = criterios.and((servicio, consulta, cb) -> {
                 Join<Servicio, Usuario> ofertador = servicio.join("ofertador");
                 return cb.or(
-                        cb.like(cb.lower(servicio.<String>get("titulo")), patron, '\\'),
-                        cb.like(cb.lower(servicio.<String>get("descripcion")), patron, '\\'),
-                        cb.like(cb.lower(servicio.<String>get("especialidad")), patron, '\\'),
-                        cb.like(cb.lower(servicio.<String>get("experiencia")), patron, '\\'),
-                        cb.like(cb.lower(ofertador.<String>get("nombre")), patron, '\\'));
+                        cb.like(cb.lower(servicio.<String>get("titulo")), cb.lower(cb.literal(patron)), '\\'),
+                        cb.like(cb.lower(servicio.<String>get("descripcion")), cb.lower(cb.literal(patron)), '\\'),
+                        cb.like(cb.lower(servicio.<String>get("especialidad")), cb.lower(cb.literal(patron)), '\\'),
+                        cb.like(cb.lower(servicio.<String>get("experiencia")), cb.lower(cb.literal(patron)), '\\'),
+                        cb.like(cb.lower(ofertador.<String>get("nombre")), cb.lower(cb.literal(patron)), '\\'));
             });
         }
         return servicios.findAll(criterios, orden.getSort());
