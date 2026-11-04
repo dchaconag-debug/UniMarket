@@ -3,7 +3,7 @@ package com.atenea.unimarket.negocio;
 import org.springframework.data.domain.Sort;
 
 public enum OrdenServicio {
-    RECIENTES("Más recientes", Sort.by(Sort.Direction.DESC, "fechaPublicacion", "id")),
+    RECIENTES("Más recientes", Sort.by(Sort.Direction.ASC, "fechaPublicacion", "id")),
     TARIFA_ASC("Tarifa: de menor a mayor", Sort.by(Sort.Direction.ASC, "tarifaPorHora")
             .and(Sort.by(Sort.Direction.DESC, "fechaPublicacion"))),
     TARIFA_DESC("Tarifa: de mayor a menor", Sort.by(Sort.Direction.DESC, "tarifaPorHora")
