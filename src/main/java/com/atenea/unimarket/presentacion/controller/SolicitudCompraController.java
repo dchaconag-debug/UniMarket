@@ -96,15 +96,23 @@ public class SolicitudCompraController {
         if (!esCliente && !esOfertador) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
+
+        List<Propuesta> listaPropuestas = solicitudes.propuestasDe(id);
+        Propuesta ultimaPropuesta = listaPropuestas.get(listaPropuestas.size() - 1);
+
+        // Regla de turno: es mi turno si la solicitud está negociando y la última propuesta NO la escribí yo
+        boolean esMiTurno = solicitud.getEstado() == EstadoSolicitud.NEGOCIANDO 
+                && !ultimaPropuesta.getAutor().getId().equals(actual.getId());
+
         model.addAttribute("solicitud", solicitud);
-        model.addAttribute("propuestas", solicitudes.propuestasDe(id));
+        model.addAttribute("propuestas", listaPropuestas);
         model.addAttribute("esCliente", esCliente);
+        model.addAttribute("esMiTurno", esMiTurno);
         model.addAttribute("puedeRechazar", esOfertador && solicitud.getEstado() == EstadoSolicitud.NEGOCIANDO);
         model.addAttribute("formato", new ServicioController.FormatoPesos());
         model.addAttribute("fecha", new FormatoFecha());
         return "solicitud/ver";
     }
-
     @PostMapping("/solicitudes/{id}/rechazar")
     public String rechazar(@AuthenticationPrincipal OidcUser oidc, @PathVariable Integer id,
             RedirectAttributes redireccion) {
