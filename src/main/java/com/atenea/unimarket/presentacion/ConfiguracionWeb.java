@@ -18,7 +18,7 @@ class ConfiguracionWeb implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new PerfilObligatorioInterceptor(usuarios))
-                .excludePathPatterns(PerfilObligatorioInterceptor.FORMULARIO, "/login", "/error",
+                .excludePathPatterns(PerfilObligatorioInterceptor.FORMULARIO, "/login", "/dev/login", "/error",
                         "/css/**", "/images/**", "/favicon.ico");
     }
 }

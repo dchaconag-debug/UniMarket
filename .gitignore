@@ -1,6 +1,7 @@
 HELP.md
 /config/application-local.yaml
 /config/client_secret*.json
+/unimarket-dev.db*
 /unimarket.db
 /unimarket.db-journal
 /unimarket.db-shm

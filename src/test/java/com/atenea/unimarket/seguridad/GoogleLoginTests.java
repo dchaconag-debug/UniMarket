@@ -29,6 +29,14 @@ class GoogleLoginTests {
     MockMvc mvc;
 
     @Test
+    void devLoginIsUnavailableOutsideDevProfile() throws Exception {
+        mvc.perform(post("/dev/login").with(oidcLogin()).with(csrf()).param("subject", "demo-ana"))
+                .andExpect(status().isNotFound());
+        mvc.perform(get("/login"))
+                .andExpect(content().string(not(containsString("/dev/login"))));
+    }
+
+    @Test
     void loginPageOffersGoogleWithoutPasswordForm() throws Exception {
         mvc.perform(get("/login"))
                 .andExpect(status().isOk())

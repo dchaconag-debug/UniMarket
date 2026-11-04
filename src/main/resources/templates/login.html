@@ -30,10 +30,19 @@
                             <p>Cerraste tu sesión en UniMarket.</p>
                             <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Cerrar aviso"></button>
                         </div>
-                        <a th:if="${googleConfigured}" th:href="@{/oauth2/authorization/google}" class="btn-solid theme-primary btn-lg w-100">Ingresar con Google</a>
-                        <div th:unless="${googleConfigured}" class="alert theme-warning" role="status">
+                        <a th:if="${devAccounts == null and googleConfigured}" th:href="@{/oauth2/authorization/google}" class="btn-solid theme-primary btn-lg w-100">Ingresar con Google</a>
+                        <div th:if="${devAccounts == null and !googleConfigured}" class="alert theme-warning" role="status">
                             <p>El inicio de sesión con Google aún no está configurado.</p>
                         </div>
+                        <form th:if="${devAccounts != null}" th:action="@{/dev/login}" method="post">
+                            <p class="alert theme-warning">Modo desarrollo. Elige una identidad simulada.</p>
+                            <label for="dev-account" class="form-label">Cuenta de prueba</label>
+                            <select id="dev-account" name="subject" class="form-select mb-3">
+                                <option th:each="account : ${devAccounts}" th:value="${account.subject}"
+                                        th:text="${account.name}"></option>
+                            </select>
+                            <button type="submit" class="btn-solid theme-primary btn-lg w-100">Ingresar en desarrollo</button>
+                        </form>
                         <p class="login-note mt-4 mb-0">El acceso está reservado a cuentas de la Universidad Nacional de Colombia.</p>
                     </div>
                 </div>
