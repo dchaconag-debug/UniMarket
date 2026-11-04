@@ -106,6 +106,9 @@ public class Servicio {
         this.horariosDisponibilidad = List.copyOf(horariosDisponibilidad);
     }
 
+    public void activar(){
+        this.estado = EstadoServicio.ACTIVO;
+    }
     /** Whether the given rate or weekly hours differ from the ones published. */
     public boolean cambiaCondiciones(int tarifaPorHora, int intensidadHoraria) {
         return !this.tarifaPorHora.equals(tarifaPorHora) || !this.intensidadHoraria.equals(intensidadHoraria);

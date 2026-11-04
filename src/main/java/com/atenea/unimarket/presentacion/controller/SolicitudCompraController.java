@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.atenea.unimarket.datos.modelo.EstadoServicio;
 import com.atenea.unimarket.datos.modelo.EstadoSolicitud;
@@ -110,6 +111,36 @@ public class SolicitudCompraController {
         try {
             solicitudes.rechazar(id, usuarioActual(oidc).getId());
             redireccion.addFlashAttribute("mensaje", "Rechazaste la solicitud. El cliente fue notificado.");
+        } catch (SolicitudNoEncontradaException noExiste) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        } catch (SolicitudNoPermitidaException | IllegalStateException noPermitida) {
+            redireccion.addFlashAttribute("aviso", noPermitida.getMessage());
+        }
+        return "redirect:/solicitudes/" + id;
+    }
+
+    @PostMapping("/solicitudes/{id}/contraproponer")
+    public String contraproponer(@AuthenticationPrincipal OidcUser oidc, @PathVariable Integer id,
+            @RequestParam(required = false) Integer tarifaPorHora,
+            @RequestParam(required = false) Integer intensidadHoraria,
+            RedirectAttributes redireccion) {
+        try {
+            solicitudes.contraproponer(id, usuarioActual(oidc).getId(), tarifaPorHora, intensidadHoraria);
+            redireccion.addFlashAttribute("mensaje", "Tu contrapropuesta ha sido enviada.");
+        } catch (SolicitudNoEncontradaException noExiste) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        } catch (SolicitudNoPermitidaException | IllegalArgumentException | IllegalStateException noPermitida) {
+            redireccion.addFlashAttribute("aviso", noPermitida.getMessage());
+        }
+        return "redirect:/solicitudes/" + id;
+    }
+
+    @PostMapping("/solicitudes/{id}/aceptar")
+    public String aceptar(@AuthenticationPrincipal OidcUser oidc, @PathVariable Integer id,
+            RedirectAttributes redireccion) {
+        try {
+            solicitudes.aceptar(id, usuarioActual(oidc).getId());
+            redireccion.addFlashAttribute("mensaje", "Aceptaste la propuesta. La negociación ha finalizado y el servicio se encuentra activo.");
         } catch (SolicitudNoEncontradaException noExiste) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         } catch (SolicitudNoPermitidaException | IllegalStateException noPermitida) {
