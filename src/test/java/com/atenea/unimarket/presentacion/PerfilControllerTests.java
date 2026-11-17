@@ -110,7 +110,8 @@ class PerfilControllerTests {
         mvc.perform(get("/perfiles/" + perfilAna.getUsuario().getId()).with(como("sub-beto", "beto@unal.edu.co")))
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Ana")))
-                .andExpect(content().string(containsString("Sin horarios registrados.")));
+                .andExpect(content().string(containsString("Sin horarios registrados.")))
+                .andExpect(content().string(not(containsString("3001234567"))));
     }
 
     @Test
