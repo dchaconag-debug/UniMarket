@@ -2,6 +2,9 @@ package com.atenea.unimarket.presentacion;
 
 import java.util.List;
 
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -216,13 +219,74 @@ class ServicioControllerTests {
     }
 
     @Test
-    void catalogoMuestraPrimeroLasCategoriasSeleccionadas() throws Exception {
-        String html = mvc.perform(get("/servicios").param("categoria", tutoriasId.toString()).with(ana()))
+    void catalogoEntregaDatosInicialesYOpcionesSinDuplicarLaInterfaz() throws Exception {
+        publicarDeAna();
+        String html = mvc.perform(get("/servicios").param("categoria", tutoriasId.toString())
+                        .param("q", "no coincide").with(ana()))
                 .andExpect(status().isOk())
-                .andExpect(content().string(not(containsString("Ver todas"))))
                 .andReturn().getResponse().getContentAsString();
-        assertThat(html.indexOf("Tutorías</span>")).isLessThan(html.indexOf("Asesoría de tesis y trabajos</span>"));
-        assertThat(html).contains("0 servicios").contains("Quitar filtros");
+        JsonNode inicial = datosIniciales(html);
+        assertThat(inicial.get("resultado").get("total").asInt()).isZero();
+        assertThat(inicial.get("resultado").get("servicios").isEmpty()).isTrue();
+        assertThat(inicial.get("categorias").size()).isEqualTo(5);
+        assertThat(inicial.get("categorias").get(4).get("value").asText()).isEqualTo(tutoriasId.toString());
+        assertThat(inicial.get("categorias").get(4).get("label").asText()).isEqualTo("Tutorías");
+        assertThat(inicial.get("ordenes").get(0).get("value").asText()).isEqualTo("ANTIGUOS");
+        assertThat(inicial.get("ordenes").get(0).get("label").asText()).isEqualTo("Más antiguos");
+        assertThat(html).contains("/js/catalogo/catalogo.js", "<noscript>")
+                .doesNotContain("id=\"filtros\"", "class=\"service-cards\"");
+    }
+
+    @Test
+    void busquedaEnVivoUsaLosMismosFiltrosYNoExponeEntidades() throws Exception {
+        Servicio publicado = servicios.findById(publicarDeAna()).orElseThrow();
+        mvc.perform(get("/api/servicios").with(ana()).param("q", "álculo")
+                        .param("categoria", tutoriasId.toString()).param("orden", "TARIFA_ASC"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(1))
+                .andExpect(jsonPath("$.servicios[0].id").value(publicado.getId()))
+                .andExpect(jsonPath("$.servicios[0].titulo").value("Cálculo I"))
+                .andExpect(jsonPath("$.servicios[0].ofertador").value("Ana"))
+                .andExpect(jsonPath("$.servicios[0].tarifaPorHora").value(25000))
+                .andExpect(jsonPath("$.servicios[0].descripcion").doesNotExist());
+        mvc.perform(get("/api/servicios").with(ana()).param("q", "%"))
+                .andExpect(jsonPath("$.total").value(0));
+        publicado.activar();
+        servicios.save(publicado);
+        mvc.perform(get("/api/servicios").with(ana()))
+                .andExpect(jsonPath("$.total").value(0));
+    }
+
+    @Test
+    void busquedaEnVivoPaginaEnLaBaseYEntregaLaPaginaInicialAPreact() throws Exception {
+        for (int i = 0; i < 21; i++) {
+            publicarDeAna();
+        }
+        mvc.perform(get("/api/servicios").with(ana()))
+                .andExpect(jsonPath("$.total").value(21))
+                .andExpect(jsonPath("$.servicios.length()").value(20))
+                .andExpect(jsonPath("$.hayMas").value(true));
+        mvc.perform(get("/api/servicios").with(ana()).param("pagina", "1"))
+                .andExpect(jsonPath("$.servicios.length()").value(1))
+                .andExpect(jsonPath("$.pagina").value(1))
+                .andExpect(jsonPath("$.hayMas").value(false));
+        String html = mvc.perform(get("/servicios").with(ana()).param("pagina", "1"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String api = mvc.perform(get("/api/servicios").with(ana()).param("pagina", "1"))
+                .andReturn().getResponse().getContentAsString();
+        assertThat(datosIniciales(html).get("resultado")).isEqualTo(new JsonMapper().readTree(api));
+    }
+
+    @Test
+    void busquedaEnVivoValidaParametrosYRequiereCuenta() throws Exception {
+        mvc.perform(get("/api/servicios")).andExpect(status().is3xxRedirection());
+        mvc.perform(get("/api/servicios").with(como("sin-perfil")))
+                .andExpect(redirectedUrl("/perfil/nuevo"));
+        mvc.perform(get("/api/servicios").with(ana()).param("q", "a".repeat(101)))
+                .andExpect(status().isBadRequest());
+        mvc.perform(get("/api/servicios").with(ana()).param("pagina", "-1"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -243,6 +307,12 @@ class ServicioControllerTests {
         mvc.perform(get("/servicios/" + servicio.getId()).with(ana()))
                 .andExpect(content().string(containsString("&lt;script&gt;")))
                 .andExpect(content().string(not(containsString("<script>x()"))));
+        String html = mvc.perform(get("/servicios").with(ana()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        assertThat(html).doesNotContain("<script>x()</script>");
+        assertThat(datosIniciales(html).get("resultado").get("servicios").get(0).get("titulo").asText())
+                .isEqualTo("<script>x()</script>");
     }
 
     // ---- Editar servicio (OFERTA-OFE-H02) ----
@@ -324,18 +394,19 @@ class ServicioControllerTests {
                 .andExpect(content().string(not(containsString("/servicios/" + id + "/editar"))));
     }
 
-        // ---- Catalogo y busqueda (BUSQUEDA-CLI-H01 y H02) ----
+    private JsonNode datosIniciales(String html) {
+        int script = html.indexOf("id=\"catalogo-inicial\"");
+        assertThat(script).isGreaterThanOrEqualTo(0);
+        int inicio = html.indexOf('>', script) + 1;
+        return new JsonMapper().readTree(html.substring(inicio, html.indexOf("</script>", inicio)));
+    }
 
     @Test
     void elCatalogoSoloListaServiciosDisponibles() throws Exception {
         publicarCon("Clases de piano", tutoriasId, 20000);
         marcar(publicarCon("Clases de violin", tutoriasId, 20000), "ACTIVO");
 
-        mvc.perform(get("/servicios").with(ana()))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Clases de piano")))
-                .andExpect(content().string(not(containsString("Clases de violin"))))
-                .andExpect(content().string(containsString("antiguos")));
+        assertThat(titulosCatalogo("/servicios")).containsExactly("Clases de piano");
     }
 
     @Test
@@ -344,13 +415,10 @@ class ServicioControllerTests {
         publicarCon("Beta dos", tutoriasId, 10000);
 
         for (String url : List.of("/servicios", "/servicios?orden=no-existe", "/servicios?orden=ANTIGUOS")) {
-            String html = pagina(url);
-            assertThat(html.indexOf("Alfa uno")).isLessThan(html.indexOf("Beta dos"));
+            assertThat(titulosCatalogo(url)).containsExactly("Alfa uno", "Beta dos");
         }
-        String recientes = pagina("/servicios?orden=RECIENTES");
-        assertThat(recientes.indexOf("Beta dos")).isLessThan(recientes.indexOf("Alfa uno"));
-        String porTarifa = pagina("/servicios?orden=TARIFA_ASC");
-        assertThat(porTarifa.indexOf("Beta dos")).isLessThan(porTarifa.indexOf("Alfa uno"));
+        assertThat(titulosCatalogo("/servicios?orden=RECIENTES")).containsExactly("Beta dos", "Alfa uno");
+        assertThat(titulosCatalogo("/servicios?orden=TARIFA_ASC")).containsExactly("Beta dos", "Alfa uno");
     }
 
     @Test
@@ -359,45 +427,32 @@ class ServicioControllerTests {
         publicarCon("Poster academico", disenoId, 40000);
         publicarCon("Calculo basico", tutoriasId, 30000);
 
-        mvc.perform(get("/servicios").param("q", "POSTER").with(ana()))
-                .andExpect(content().string(containsString("Poster academico")))
-                .andExpect(content().string(not(containsString("Calculo basico"))));
-        mvc.perform(get("/servicios").param("categoria", tutoriasId.toString()).with(ana()))
-                .andExpect(content().string(containsString("Calculo basico")))
-                .andExpect(content().string(not(containsString("Poster academico"))));
-        mvc.perform(get("/servicios").param("categoria", tutoriasId.toString())
-                        .param("categoria", disenoId.toString()).with(ana()))
-                .andExpect(content().string(containsString("Calculo basico")))
-                .andExpect(content().string(containsString("Poster academico")));
+        assertThat(titulosCatalogo("/servicios?q=POSTER")).containsExactly("Poster academico");
+        assertThat(titulosCatalogo("/servicios?categoria=" + tutoriasId)).containsExactly("Calculo basico");
+        assertThat(titulosCatalogo("/servicios?categoria=" + tutoriasId + "&categoria=" + disenoId))
+                .containsExactlyInAnyOrder("Calculo basico", "Poster academico");
     }
 
     @Test
     void elFormularioConservaLosCriteriosDeBusqueda() throws Exception {
-        publicarCon("Calculo basico", tutoriasId, 30000);
+        Integer disenoId = categoriaId("Dise");
+        String html = mvc.perform(get("/servicios").with(ana())
+                        .param("q", "calculo").param("categoria", tutoriasId + "," + disenoId))
+                .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
 
-        mvc.perform(get("/servicios").param("q", "calculo").param("categoria", tutoriasId.toString()).with(ana()))
-                .andExpect(content().string(containsString("value=\"calculo\"")))
-                .andExpect(content().string(containsString("checked=\"checked\"")))
-                .andExpect(content().string(containsString("Quitar filtros")));
+        JsonNode filtros = datosIniciales(html).get("filtros");
+        assertThat(filtros.get("q").asText()).isEqualTo("calculo");
+        assertThat(filtros.get("categories").valueStream().map(JsonNode::asText).toList())
+                .containsExactly(tutoriasId.toString(), disenoId.toString());
+        assertThat(filtros.get("order").asText()).isEqualTo("ANTIGUOS");
     }
 
     @Test
-    void sinCoincidenciasSugiereAjustarLosCriterios() throws Exception {
+    void elCatalogoEntregaResultadosVaciosConYSinCriterios() throws Exception {
+        assertThat(titulosCatalogo("/servicios")).isEmpty();
+
         publicarCon("Calculo basico", tutoriasId, 30000);
-
-        mvc.perform(get("/servicios").param("q", "inexistente").with(ana()))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("No encontramos servicios con esos criterios.")))
-                .andExpect(content().string(containsString("quita algunos filtros")))
-                .andExpect(content().string(not(containsString("Calculo basico"))));
-    }
-
-    @Test
-    void sinServiciosNiFiltrosInvitaAPublicar() throws Exception {
-        mvc.perform(get("/servicios").with(ana()))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("no hay servicios disponibles")))
-                .andExpect(content().string(containsString("Publicar un servicio")));
+        assertThat(titulosCatalogo("/servicios?q=inexistente")).isEmpty();
     }
 
     @Test
@@ -429,9 +484,12 @@ class ServicioControllerTests {
         jdbc.update("UPDATE servicio SET estado = ? WHERE id = ?", estado, servicioId);
     }
 
-    private String pagina(String url) throws Exception {
-        return mvc.perform(get(url).with(ana())).andExpect(status().isOk())
+    private List<String> titulosCatalogo(String url) throws Exception {
+        String html = mvc.perform(get(url).with(ana())).andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
+        return datosIniciales(html).get("resultado").get("servicios").valueStream()
+                .map(servicio -> servicio.get("titulo").asText())
+                .toList();
     }
 
     private Integer publicarDeAna() {
