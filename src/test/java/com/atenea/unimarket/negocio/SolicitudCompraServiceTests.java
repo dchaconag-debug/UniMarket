@@ -95,13 +95,13 @@ class SolicitudCompraServiceTests {
         assertThat(delCliente.getFirst().getMensaje()).contains("Ana", "Cálculo I", "$30.000 COP", "6 horas por semana");
         assertThat(notificaciones.deUsuario(anaId)).hasSize(1);
 
-        solicitudes.contraproponer(solicitudId, betoId, null, 12);
+        solicitudes.contraproponer(solicitudId, betoId, 28000, null);;
 
         List<Notificacion> delOfertador = notificaciones.deUsuario(anaId);
         assertThat(delOfertador).hasSize(2);
         assertThat(delOfertador.getFirst().getTipo()).isEqualTo(TipoNotificacion.CONTRAPROPUESTA_RECIBIDA);
         assertThat(delOfertador.getFirst().getSolicitud().getId()).isEqualTo(solicitudId);
-        assertThat(delOfertador.getFirst().getMensaje()).contains("Beto", "Cálculo I", "$30.000 COP", "6 horas por semana");
+        assertThat(delOfertador.getFirst().getMensaje()).contains("Beto", "Cálculo I", "$28.000 COP", "6 horas por semana");
         assertThat(notificaciones.deUsuario(betoId)).hasSize(1);
     }
 
@@ -144,6 +144,18 @@ class SolicitudCompraServiceTests {
                 .isInstanceOf(SolicitudNoPermitidaException.class);
         assertThatThrownBy(() -> solicitudes.contraproponer(solicitudId, anaId, 0, 6))
                 .isInstanceOf(IllegalArgumentException.class);
+        assertThat(notificacionRepository.count()).isEqualTo(1);
+    }
+
+        @Test
+    void unaContrapropuestaSinCambiosSeRechazaYNoGuardaNiNotificaNada() {
+        Integer solicitudId = solicitudes.crear(betoId, servicioId, 20000).getId();
+
+        assertThatThrownBy(() -> solicitudes.contraproponer(solicitudId, anaId, 20000, 4))
+                .isInstanceOf(SolicitudNoPermitidaException.class)
+                .hasMessageContaining("no cambia");
+
+        assertThat(propuestaRepository.findBySolicitudIdOrderByNumeroRondaAsc(solicitudId)).hasSize(1);
         assertThat(notificacionRepository.count()).isEqualTo(1);
     }
 
