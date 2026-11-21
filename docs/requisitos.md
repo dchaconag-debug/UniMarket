@@ -1,4 +1,4 @@
-# Requisitos del producto
+de# Requisitos del producto
 
 Base funcional de UniMarket. Cada caso reúne sus reglas, excepciones e historias de usuario.
 
@@ -17,7 +17,7 @@ Actor principal: cliente. Requiere perfiles de cliente y ofertador y un servicio
 1. El cliente consulta la tarifa por hora y la intensidad horaria de la oferta.
 2. Inicia una solicitud aceptando las condiciones publicadas o proponiendo otra tarifa. El cliente no modifica la intensidad horaria.
 3. El sistema registra la solicitud en `NEGOCIANDO` y notifica al ofertador.
-4. El ofertador acepta, rechaza o contrapropone tarifa e intensidad. El cliente puede aceptar o volver a proponer solo tarifa.
+4. 4. El ofertador acepta, rechaza o contrapropone tarifa e intensidad. El cliente puede aceptar o volver a proponer solo tarifa. Una contrapropuesta debe modificar algo de la propuesta vigente (para el cliente, la tarifa); si no cambia nada, el sistema la rechaza sin registrar una ronda nueva ni notificar.
 5. Se conservan todas las propuestas, sus autores, fechas y resultado. No hay límite fijo de rondas.
 6. La aceptación de la propuesta vigente por la contraparte registra el acuerdo y activa la solicitud. No basta la aceptación unilateral de las condiciones originales por el cliente.
 7. Cuando el cliente acepta, se cancelan sus otras solicitudes abiertas para el mismo servicio buscado. Solo la primera aceptación concurrente debe producir el acuerdo. La agrupación de solicitudes competidoras se detalla en las preguntas abiertas de este caso.
