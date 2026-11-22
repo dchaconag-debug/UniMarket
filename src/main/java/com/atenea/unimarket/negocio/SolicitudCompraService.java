@@ -107,6 +107,13 @@ public class SolicitudCompraService {
                 ? ultimaPropuesta.getIntensidadHoraria() 
                 : (intensidadHoraria != null ? intensidadHoraria : ultimaPropuesta.getIntensidadHoraria());
 
+        // Una contrapropuesta debe cambiar algo: si queda igual a la vigente, no es una propuesta nueva
+        if (tarifa == ultimaPropuesta.getTarifaPorHora()
+                && intensidad == ultimaPropuesta.getIntensidadHoraria()) {
+            throw new SolicitudNoPermitidaException(
+                    "Tu contrapropuesta no cambia las condiciones vigentes. Modifica la tarifa o acepta la propuesta.");
+        }         
+
         Instant ahora = Instant.now(reloj);
 
         // Crear la nueva propuesta incrementando el número de ronda

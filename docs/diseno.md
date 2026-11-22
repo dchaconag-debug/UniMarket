@@ -95,9 +95,9 @@ Aunque se titula "Ofertar y Editar", esta secuencia representa publicación. Las
 [Diagrama original, E3 p. 12](diagramas/clases-diseno.png).
 
 - `ServicioController`: `publicarServicio(datos: ServicioDTO)`, `editarServicio(servicioId, datos: ServicioDTO)`.
-- `SolicitudCompraController`: `crearSolicitud(servicioId, tarifa)`, `contraproponer(solicitudId, tarifa, intensidad)`, `aceptarPropuesta(solicitudId)`, `confirmarFinalizacion(solicitudId)`.
+- `SolicitudCompraController`: `crearSolicitud(servicioId, tarifa)`, `contraproponer(solicitudId, tarifa, intensidad)`, `aceptar(solicitudId, propuestaId)`, `rechazar(solicitudId)`, `confirmarFinalizacion(solicitudId)`.
 - `ServicioService`: `publicar(ofertadorId, datos)`, `editar(servicioId, ofertadorId, datos)` y operación privada `verificarOfertador(ofertadorId)`.
-- `SolicitudCompraService`: `crear(clienteId, servicioId, tarifa)`, `contraproponer(solicitudId, usuarioId, tarifa, intensidad)`, `aceptarPropuesta(solicitudId, usuarioId)`, `confirmarFinalizacion(solicitudId, clienteId)` y operación privada `cancelarSolicitudesAbiertas(clienteId, solicitudId)`.
+- `SolicitudCompraService`: `crear(clienteId, servicioId, tarifa)`, `contraproponer(solicitudId, usuarioId, tarifa, intensidad)`, `aceptar(solicitudId, usuarioId, propuestaId)`, `rechazar(solicitudId, ofertadorId)`, `confirmarFinalizacion(solicitudId, clienteId)` y operación privada `cancelarSolicitudesAbiertas(clienteId, solicitudId)`.
 - `IUsuarioRepository` e `ICategoriaRepository`: `buscarPorId(id)`.
 - `IServicioRepository`: `guardar(s)`, `buscarPorId(id)`.
 - `ISolicitudCompraRepository`: `guardar(sc)`, `buscarPorId(id)`, `buscarAbiertasPorCliente(clienteId)`.
@@ -105,6 +105,7 @@ Aunque se titula "Ofertar y Editar", esta secuencia representa publicación. Las
 - `INotificador.notificar(usuarioId, mensaje)`, implementado por `NotificadorCorreo`.
 
 Para el parámetro intensidad, aplicar los permisos por rol de [CU-01](requisitos.md#cu-01-comprar--negociar-servicio). El diagrama no detalla ServicioDTO.
+`aceptar` recibe la propuesta que la persona vio (`propuestaId`) y se rechaza si la propuesta vigente cambió mientras tanto. `contraproponer` se rechaza si la tarifa y la intensidad quedan iguales a las de la propuesta vigente. `rechazar` lo hace solo el ofertador y cancela la solicitud sin tocar el servicio.
 
 ## Persistencia
 
