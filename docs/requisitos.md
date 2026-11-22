@@ -28,7 +28,7 @@ Excepciones:
 
 - Rechazo sin contrapropuesta: cancelar la solicitud, notificar al cliente y mantener el servicio disponible.
 - Retiro del cliente o negociación sin acuerdo: terminar sin compra. La solicitud queda `CANCELADA`, se notifica a la otra parte y el servicio sigue disponible.
-- Una semana sin respuesta del ofertador desde la última propuesta del cliente: finalizar por inactividad y notificar al cliente.
+- Una semana sin respuesta del ofertador desde la última propuesta del cliente: finalizar por inactividad y notificar al cliente. La solicitud queda `CANCELADA` y el servicio sigue disponible.
 - Falta de confirmación de finalización: el servicio se cierra al cumplirse el plazo o entregarse lo acordado. El plazo de confirmación automática es de una semana; falta definir desde qué evento se cuenta y su relación con el plazo de entrega.
 - Si el ofertador no confirma disponibilidad después del acuerdo, cancelar el servicio activo y notificar al cliente. Falta definir el flujo y plazo de esa confirmación.
 
