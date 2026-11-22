@@ -104,7 +104,7 @@ Aunque se titula "Ofertar y Editar", esta secuencia representa publicación. Las
 - Implementaciones: `UsuarioRepositorySQL`, `CategoriaRepositorySQL`, `ServicioRepositorySQL`, `SolicitudCompraRepositorySQL`.
 - `INotificador.notificar(usuarioId, mensaje)`, implementado por `NotificadorCorreo`.
 
-Para el parámetro intensidad, aplicar los permisos por rol de [CU-01](requisitos.md#cu-01-comprar--negociar-servicio). El diagrama no detalla ServicioDTO.
+`SolicitudCompraService.retirar(solicitudId, clienteId)` (expuesto como `retirar(solicitudId)` en `SolicitudCompraController`) lo hace solo el cliente mientras la solicitud está en negociación: la deja `CANCELADA`, notifica al ofertador y no modifica el servicio, que sigue disponible. Los cierres sin acuerdo comparten el tipo de notificación `SOLICITUD_RECHAZADA`; el motivo se distingue en el mensaje.
 
 ## Persistencia
 
