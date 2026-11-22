@@ -3,6 +3,7 @@ package com.atenea.unimarket.negocio;
 import java.text.NumberFormat;
 import java.time.Clock;
 import java.time.Instant;
+import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -213,6 +214,38 @@ public class SolicitudCompraService {
                 solicitud.getCliente().getNombre() + " se retiró de la negociación de «" + servicio.getTitulo()
                         + "». El servicio sigue disponible.");
         return solicitud;
+    }
+
+    /** Tiempo sin respuesta del ofertador, tras una propuesta del cliente, antes de cerrar la solicitud. */
+    static final Duration PLAZO_INACTIVIDAD = Duration.ofDays(7);
+
+    /**
+     * Cierra las negociaciones en las que el ofertador no respondió en una semana a la
+     * última propuesta del cliente. Cada una queda CANCELADA, se notifica al cliente y el servicio
+     * sigue disponible. Devuelve cuántas cerró.
+     */
+    @Transactional
+    public int cerrarInactivas(Instant ahora) {
+        Instant limite = ahora.minus(PLAZO_INACTIVIDAD);
+        int cerradas = 0;
+        for (SolicitudCompra solicitud : solicitudes.findByEstado(EstadoSolicitud.NEGOCIANDO)) {
+            if (solicitud.getFechaUltimaActividad().isAfter(limite)) {
+                continue;
+            }
+            Propuesta ultima = propuestas.findFirstBySolicitudIdOrderByNumeroRondaDesc(solicitud.getId())
+                    .orElseThrow(() -> new IllegalStateException("La solicitud no contiene propuestas previas."));
+            if (!ultima.getAutor().getId().equals(solicitud.getCliente().getId())) {
+                continue;
+            }
+            Servicio servicio = solicitud.getServicio();
+            solicitud.cancelar(ahora);
+            solicitudes.save(solicitud);
+            notificador.notificar(solicitud.getCliente(), solicitud, TipoNotificacion.SOLICITUD_RECHAZADA,
+                    servicio.getOfertador().getNombre() + " no respondió en una semana a tu propuesta para «"
+                            + servicio.getTitulo() + "». La solicitud se cerró por inactividad y el servicio sigue disponible.");
+            cerradas++;
+        }
+        return cerradas;
     }
 
     @Transactional(readOnly = true)

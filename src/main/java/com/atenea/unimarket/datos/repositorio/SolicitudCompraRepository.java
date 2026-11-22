@@ -1,6 +1,7 @@
 package com.atenea.unimarket.datos.repositorio;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -12,4 +13,6 @@ public interface SolicitudCompraRepository extends JpaRepository<SolicitudCompra
     boolean existsByServicioIdAndEstadoIn(Integer servicioId, Collection<EstadoSolicitud> estados);
 
     boolean existsByClienteIdAndServicioIdAndEstado(Integer clienteId, Integer servicioId, EstadoSolicitud estado);
+
+     List<SolicitudCompra> findByEstado(EstadoSolicitud estado);
 }
