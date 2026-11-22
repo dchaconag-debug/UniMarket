@@ -193,6 +193,28 @@ public class SolicitudCompraService {
         return solicitud;
     }
 
+    /**
+     * COMPRA-CLI-H03: el cliente se retira de una negociación abierta. La solicitud queda
+     * CANCELADA, se notifica al ofertador y el servicio sigue disponible.
+     */
+    @Transactional
+    public SolicitudCompra retirar(Integer solicitudId, Integer usuarioId) {
+        SolicitudCompra solicitud = solicitudes.findById(solicitudId)
+                .orElseThrow(SolicitudNoEncontradaException::new);
+        if (!solicitud.getCliente().getId().equals(usuarioId)) {
+            throw new SolicitudNoPermitidaException("Solo el cliente puede retirarse de la solicitud.");
+        }
+        Servicio servicio = solicitud.getServicio();
+        solicitud.cancelar(Instant.now(reloj));
+        solicitudes.save(solicitud);
+         // SOLICITUD_RECHAZADA cubre todo cierre de una negociación sin acuerdo (rechazo, retiro o vencimiento);
+        // el motivo se distingue en el mensaje.
+        notificador.notificar(servicio.getOfertador(), solicitud, TipoNotificacion.SOLICITUD_RECHAZADA,
+                solicitud.getCliente().getNombre() + " se retiró de la negociación de «" + servicio.getTitulo()
+                        + "». El servicio sigue disponible.");
+        return solicitud;
+    }
+
     @Transactional(readOnly = true)
     public Optional<SolicitudCompra> buscarPorId(Integer id) {
         return solicitudes.findById(id);

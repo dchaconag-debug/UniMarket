@@ -293,6 +293,42 @@ class SolicitudCompraServiceTests {
         return propuestaRepository.findFirstBySolicitudIdOrderByNumeroRondaDesc(solicitudId).orElseThrow().getId();
     }
 
+        @Test
+    void retirarseCancelaLaSolicitudNotificaAlOfertadorYElServicioSigueDisponible() {
+        Integer solicitudId = solicitudes.crear(betoId, servicioId, null).getId();
+
+        solicitudes.retirar(solicitudId, betoId);
+
+        assertThat(solicitudRepository.findById(solicitudId).orElseThrow().getEstado())
+                .isEqualTo(EstadoSolicitud.CANCELADA);
+        assertThat(servicios.findById(servicioId).orElseThrow().getEstado()).isEqualTo(EstadoServicio.DISPONIBLE);
+        List<Notificacion> delOfertador = notificaciones.deUsuario(anaId);
+        assertThat(delOfertador).hasSize(2);
+        assertThat(delOfertador.getFirst().getMensaje()).contains("Beto", "Cálculo I", "se retiró");
+        assertThat(notificaciones.deUsuario(betoId)).isEmpty();
+    }
+
+    @Test
+    void soloElClientePuedeRetirarse() {
+        Integer solicitudId = solicitudes.crear(betoId, servicioId, null).getId();
+
+        assertThatThrownBy(() -> solicitudes.retirar(solicitudId, anaId))
+                .isInstanceOf(SolicitudNoPermitidaException.class);
+        assertThat(solicitudRepository.findById(solicitudId).orElseThrow().getEstado())
+                .isEqualTo(EstadoSolicitud.NEGOCIANDO);
+        assertThat(notificaciones.deUsuario(anaId)).hasSize(1);
+    }
+
+    @Test
+    void noSePuedeRetirarUnaSolicitudQueYaNoEstaEnNegociacion() {
+        Integer solicitudId = solicitudes.crear(betoId, servicioId, null).getId();
+        solicitudes.retirar(solicitudId, betoId);
+
+        assertThatThrownBy(() -> solicitudes.retirar(solicitudId, betoId))
+                .isInstanceOf(IllegalStateException.class);
+        assertThat(notificaciones.deUsuario(anaId)).hasSize(2);
+    }
+
     @Test
     void tercerosNoPuedenAlterarNiAceptarUnaNegociacion() {
         Integer tercero = perfiles.registrar("sub-tercero", "tercero@unal.edu.co", "Tercero", "3201112233", List.of()).getUsuario().getId();

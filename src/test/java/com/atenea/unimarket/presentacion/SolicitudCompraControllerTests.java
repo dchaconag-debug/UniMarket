@@ -242,6 +242,37 @@ class SolicitudCompraControllerTests {
                 .isEqualTo(EstadoSolicitud.NEGOCIANDO);
     }
 
+        @Test
+    void elClienteSeRetiraYElOfertadorEsNotificado() throws Exception {
+        Integer solicitudId = solicitudes.crear(betoId, servicioId, null).getId();
+
+        mvc.perform(get("/solicitudes/" + solicitudId).with(beto()))
+                .andExpect(content().string(containsString("Retirarme de la negociación")));
+        mvc.perform(post("/solicitudes/" + solicitudId + "/retirar").with(beto()).with(csrf()))
+                .andExpect(redirectedUrl("/solicitudes/" + solicitudId))
+                .andExpect(flash().attributeExists("mensaje"));
+
+        assertThat(solicitudRepository.findById(solicitudId).orElseThrow().getEstado())
+                .isEqualTo(EstadoSolicitud.CANCELADA);
+        assertThat(servicios.findById(servicioId).orElseThrow().getEstado()).isEqualTo(EstadoServicio.DISPONIBLE);
+        mvc.perform(get("/notificaciones").with(ana()))
+                .andExpect(content().string(containsString("se retiró")));
+        mvc.perform(get("/solicitudes/" + solicitudId).with(beto()))
+                .andExpect(content().string(not(containsString("Retirarme de la negociación"))));
+    }
+
+    @Test
+    void elOfertadorNoPuedeRetirarseDeLaSolicitudDelCliente() throws Exception {
+        Integer solicitudId = solicitudes.crear(betoId, servicioId, null).getId();
+
+        mvc.perform(post("/solicitudes/" + solicitudId + "/retirar").with(ana()).with(csrf()))
+                .andExpect(redirectedUrl("/solicitudes/" + solicitudId))
+                .andExpect(flash().attributeExists("aviso"));
+
+        assertThat(solicitudRepository.findById(solicitudId).orElseThrow().getEstado())
+                .isEqualTo(EstadoSolicitud.NEGOCIANDO);
+    }
+
     @Test
     void sinPerfilNoPuedeSolicitar() throws Exception {
         mvc.perform(get("/servicios/" + servicioId + "/solicitar").with(como("sub-nuevo")))
