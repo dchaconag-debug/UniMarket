@@ -41,7 +41,15 @@ Asociaciones visibles:
 
 Las páginas 6 y 8 descartan entidades separadas para cliente, ofertador, negociación, intercambio, formulario y buscador. Negociación se representa mediante SolicitudCompra y el intercambio mediante sus propuestas. Categoría sí es entidad. `numeroRonda` ordena propuestas.
 
-`Notificador` en el modelo tiene datos de una notificación persistida; `INotificador` y `NotificadorCorreo` en diseño son el mecanismo de envío. Son responsabilidades distintas. Falta definir la relación entre persistencia, envío externo, reintentos y fallos, y enumerar los valores de `TipoNotificacion`. Reseñas y denuncias no aparecen modeladas aquí; eso no las retira del alcance.
+`Notificador` en el modelo tiene datos de una notificación persistida; `INotificador` y `NotificadorCorreo` en diseño son el mecanismo de envío. Son responsabilidades distintas. Las notificaciones de la aplicación se persisten en la transacción de la solicitud y se anuncian por SSE después del commit. Leer y descartar son estados persistidos independientes; descartar retira el aviso del desplegable, pero lo conserva en el historial. Falta definir el envío externo y sus reintentos y fallos. Reseñas y denuncias no aparecen modeladas aquí; eso no las retira del alcance.
+
+Por defecto, el historial agrupa las notificaciones por su tipo guardado y muestra primero las más recientes de cada grupo. El interruptor «Agrupar por categoría» permite ver una sola lista, de la más reciente a la más antigua. El navegador recuerda la preferencia.
+
+| Categoría | Valores de `TipoNotificacion` |
+| --- | --- |
+| Negociación | `SOLICITUD_RECIBIDA`, `CONTRAPROPUESTA_RECIBIDA` |
+| Acuerdos | `ACUERDO_CONFIRMADO` |
+| Cancelaciones | `SOLICITUD_RECHAZADA` |
 
 ## Estados
 
@@ -95,9 +103,9 @@ Aunque se titula "Ofertar y Editar", esta secuencia representa publicación. Las
 [Diagrama original, E3 p. 12](diagramas/clases-diseno.png).
 
 - `ServicioController`: `publicarServicio(datos: ServicioDTO)`, `editarServicio(servicioId, datos: ServicioDTO)`.
-- `SolicitudCompraController`: `crearSolicitud(servicioId, tarifa)`, `contraproponer(solicitudId, tarifa, intensidad)`, `aceptarPropuesta(solicitudId)`, `confirmarFinalizacion(solicitudId)`.
+- `SolicitudCompraController`: `crearSolicitud(servicioId, tarifa)`, `contraproponer(solicitudId, tarifa, intensidad)`, `aceptar(solicitudId, propuestaId)`, `rechazar(solicitudId)`, `confirmarFinalizacion(solicitudId)`.
 - `ServicioService`: `publicar(ofertadorId, datos)`, `editar(servicioId, ofertadorId, datos)` y operación privada `verificarOfertador(ofertadorId)`.
-- `SolicitudCompraService`: `crear(clienteId, servicioId, tarifa)`, `contraproponer(solicitudId, usuarioId, tarifa, intensidad)`, `aceptarPropuesta(solicitudId, usuarioId)`, `confirmarFinalizacion(solicitudId, clienteId)` y operación privada `cancelarSolicitudesAbiertas(clienteId, solicitudId)`.
+- `SolicitudCompraService`: `crear(clienteId, servicioId, tarifa)`, `contraproponer(solicitudId, usuarioId, tarifa, intensidad)`, `aceptar(solicitudId, usuarioId, propuestaId)`, `rechazar(solicitudId, ofertadorId)`, `confirmarFinalizacion(solicitudId, clienteId)` y operación privada `cancelarSolicitudesAbiertas(clienteId, solicitudId)`.
 - `IUsuarioRepository` e `ICategoriaRepository`: `buscarPorId(id)`.
 - `IServicioRepository`: `guardar(s)`, `buscarPorId(id)`.
 - `ISolicitudCompraRepository`: `guardar(sc)`, `buscarPorId(id)`, `buscarAbiertasPorCliente(clienteId)`.
@@ -105,6 +113,7 @@ Aunque se titula "Ofertar y Editar", esta secuencia representa publicación. Las
 - `INotificador.notificar(usuarioId, mensaje)`, implementado por `NotificadorCorreo`.
 
 Para el parámetro intensidad, aplicar los permisos por rol de [CU-01](requisitos.md#cu-01-comprar--negociar-servicio). El diagrama no detalla ServicioDTO.
+`aceptar` recibe la propuesta que la persona vio (`propuestaId`) y se rechaza si la propuesta vigente cambió mientras tanto. `contraproponer` se rechaza si la tarifa y la intensidad quedan iguales a las de la propuesta vigente. `rechazar` lo hace solo el ofertador y cancela la solicitud sin tocar el servicio.
 
 `SolicitudCompraService.retirar(solicitudId, clienteId)` (expuesto como `retirar(solicitudId)` en `SolicitudCompraController`) lo hace solo el cliente mientras la solicitud está en negociación: la deja `CANCELADA`, notifica al ofertador y no modifica el servicio, que sigue disponible.
 
@@ -114,7 +123,7 @@ Los cierres sin acuerdo (rechazo del ofertador, retiro del cliente y cierre por 
 
 ## Persistencia
 
-Basado en el [esquema, E3 p. 13](diagramas/persistencia.png). Todas las tablas tienen `id integer` como clave primaria. `NN` significa NOT NULL. `usuario`, `perfil`, `categoria` y `servicio` reflejan las decisiones de implementación descritas abajo; las demás tablas transcriben la imagen sin inferir restricciones adicionales.
+Basado en el [esquema, E3 p. 13](diagramas/persistencia.png). Todas las tablas tienen `id integer` como clave primaria. `NN` significa NOT NULL. `usuario`, `perfil`, `categoria`, `servicio`, `conversacion` y `mensaje` reflejan las decisiones de implementación descritas abajo; las demás tablas transcriben la imagen sin inferir restricciones adicionales.
 
 | Tabla | Columnas aparte de id |
 | --- | --- |
@@ -125,11 +134,16 @@ Basado en el [esquema, E3 p. 13](diagramas/persistencia.png). Todas las tablas t
 | `solicitud_compra` | `cliente_id integer NN`, `servicio_id integer NN`, `fecha_creacion timestamp NN`, `fecha_ultima_actividad timestamp`, `estado estado_solicitud NN` |
 | `propuesta` | `solicitud_id integer NN`, `autor_id integer NN`, `tarifa_por_hora integer NN`, `intensidad_horaria integer`, `numero_ronda integer NN`, `fecha_envio timestamp NN` |
 | `notificador` | `usuario_id integer NN`, `solicitud_id integer NN`, `mensaje text NN`, `leida boolean NN`, `fecha_creacion timestamp NN`, `tipo tipo_notificacion NN` |
+| `conversacion` | `servicio_id integer NN`, `cliente_id integer NN`, `fecha_creacion timestamp NN`; `UNIQUE (servicio_id, cliente_id)` |
+| `mensaje` | `conversacion_id integer NN`, `autor_id integer NN`, `contenido text NN` (no vacío, máximo 1000 caracteres), `fecha_envio timestamp NN` |
 
-Las claves foráneas enlazan perfil con usuario; servicio con usuario y categoría; solicitud con cliente y servicio; propuesta con solicitud y autor; notificador con usuario y solicitud.
+Las claves foráneas enlazan perfil con usuario; servicio con usuario y categoría; solicitud con cliente y servicio; propuesta con solicitud y autor; notificador con usuario; solicitud; conversacion con servicio y cliente; mensaje con conversacion y autor.
 
-Los campos académicos y de servicios del formulario de [CU-04](requisitos.md#cu-04-crear-y-actualizar-perfil) (carrera, semestre, avance, intereses, experiencia, especialidad) se agregarán a `perfil` en una migración posterior. `google_sub` guarda el claim `sub` de Google, identificador estable de la cuenta. El esquema original incluía `password_hash`, `telefono` en usuario y `verificado` en perfil; se retiraron porque no hay contraseñas, el teléfono de contacto vive en perfil y toda cuenta queda verificada al iniciar sesión. Usuario y perfil se crean en la misma transacción al guardar el formulario de [CU-04](requisitos.md#cu-04-crear-y-actualizar-perfil); no existe usuario sin perfil. `perfil.horarios_disponibilidad` guarda un arreglo JSON de franjas semanales, por ejemplo `[{"dia":"LUNES","inicio":"08:00","fin":"10:00"}]`, con `dia` de `LUNES` a `DOMINGO`, horas `HH:MM` e `inicio` anterior a `fin`. SQLite no tiene tipo JSON de columna, así que se guarda como texto con un `CHECK` de `json_valid`; la aplicación valida la forma de cada franja. Los valores de `tipo_notificacion` no se enumeran.
+Los campos académicos y de servicios del formulario de [CU-04](requisitos.md#cu-04-crear-y-actualizar-perfil) (carrera, semestre, avance, intereses, experiencia, especialidad) se agregarán a `perfil` en una migración posterior. `google_sub` guarda el claim `sub` de Google, identificador estable de la cuenta. El esquema original incluía `password_hash`, `telefono` en usuario y `verificado` en perfil; se retiraron porque no hay contraseñas, el teléfono de contacto vive en perfil y toda cuenta queda verificada al iniciar sesión. Usuario y perfil se crean en la misma transacción al guardar el formulario de [CU-04](requisitos.md#cu-04-crear-y-actualizar-perfil); no existe usuario sin perfil. `perfil.horarios_disponibilidad` guarda un arreglo JSON de franjas semanales, por ejemplo `[{"dia":"LUNES","inicio":"08:00","fin":"10:00"}]`, con `dia` de `LUNES` a `DOMINGO`, horas `HH:MM` e `inicio` anterior a `fin`. SQLite no tiene tipo JSON de columna, así que se guarda como texto con un `CHECK` de `json_valid`; la aplicación valida la forma de cada franja. Los valores de `tipo_notificacion` son los enumerados en entidades y asociaciones.
 
 En `servicio`, la tarifa se guarda en pesos colombianos enteros, sin decimales, porque SQLite almacena `decimal` como número de punto flotante; `propuesta` usa la misma unidad. La intensidad horaria son horas por semana, entre 1 y 168. `titulo` se agregó al esquema original para listados y búsqueda. La imagen marcaba sin NN la descripción y la intensidad, obligatorias en CU-02. El esquema original llamaba `ofertante_id` a la columna del ofertador. SQLite no tiene tipos enumerados, así que `estado` es texto con un `CHECK` de los valores de `EstadoServicio`, y `horarios_disponibilidad` usa el mismo formato JSON que `perfil`. Las categorías son una lista fija creada por la migración hasta que exista un rol de administrador que las gestione.
 
+
+El chat no aparece en E3. Una conversación es única por servicio y cliente: el ofertador es el del servicio, así que no se guarda aparte. La conversación se crea al enviar el primer mensaje. Cada mensaje guarda su autor y su fecha, tiene máximo 1000 caracteres y no se edita ni se borra, para conservarlo como posible evidencia de una denuncia futura.
 El esquema cubre principalmente compra y publicación. Falta representar el grupo de solicitudes competidoras, fecha límite, horarios acordados y acuerdo aceptado explícito, además de persistencia para reseñas, denuncias y guardados. Completar esas estructuras para cumplir los casos de uso.
+
