@@ -119,6 +119,10 @@
         <form th:if="${puedeRechazar}" th:action="@{/solicitudes/{id}/rechazar(id=${solicitud.id})}" method="post" class="mt-6">
             <button type="submit" class="btn-outline theme-danger">Rechazar solicitud</button>
         </form>
+
+        <form th:if="${puedeRetirar}" th:action="@{/solicitudes/{id}/retirar(id=${solicitud.id})}" method="post" class="mt-6">
+            <button type="submit" class="btn-outline theme-danger">Retirarme de la negociación</button>
+        </form>
     </article>
 </main>
 <script th:replace="~{fragmentos/bootstrap :: scripts}"></script>

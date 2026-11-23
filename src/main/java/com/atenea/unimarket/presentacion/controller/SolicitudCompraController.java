@@ -112,6 +112,7 @@ public class SolicitudCompraController {
         model.addAttribute("esCliente", esCliente);
         model.addAttribute("esMiTurno", esMiTurno);
         model.addAttribute("puedeRechazar", esOfertador && solicitud.getEstado() == EstadoSolicitud.NEGOCIANDO);
+        model.addAttribute("puedeRetirar", esCliente && solicitud.getEstado() == EstadoSolicitud.NEGOCIANDO);
         model.addAttribute("formato", new ServicioController.FormatoPesos());
         model.addAttribute("fecha", new FormatoFecha());
         return "solicitud/ver";
@@ -122,6 +123,20 @@ public class SolicitudCompraController {
         try {
             solicitudes.rechazar(id, usuarioActual(oidc).getId());
             redireccion.addFlashAttribute("mensaje", "Rechazaste la solicitud. El cliente fue notificado.");
+        } catch (SolicitudNoEncontradaException noExiste) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        } catch (SolicitudNoPermitidaException | IllegalStateException noPermitida) {
+            redireccion.addFlashAttribute("aviso", noPermitida.getMessage());
+        }
+        return "redirect:/solicitudes/" + id;
+    }
+
+    @PostMapping("/solicitudes/{id}/retirar")
+    public String retirar(@AuthenticationPrincipal OidcUser oidc, @PathVariable Integer id,
+            RedirectAttributes redireccion) {
+        try {
+            solicitudes.retirar(id, usuarioActual(oidc).getId());
+            redireccion.addFlashAttribute("mensaje", "Te retiraste de la negociación. El ofertador fue notificado.");
         } catch (SolicitudNoEncontradaException noExiste) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         } catch (SolicitudNoPermitidaException | IllegalStateException noPermitida) {

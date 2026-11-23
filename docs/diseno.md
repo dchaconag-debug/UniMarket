@@ -115,6 +115,12 @@ Aunque se titula "Ofertar y Editar", esta secuencia representa publicación. Las
 Para el parámetro intensidad, aplicar los permisos por rol de [CU-01](requisitos.md#cu-01-comprar--negociar-servicio). El diagrama no detalla ServicioDTO.
 `aceptar` recibe la propuesta que la persona vio (`propuestaId`) y se rechaza si la propuesta vigente cambió mientras tanto. `contraproponer` se rechaza si la tarifa y la intensidad quedan iguales a las de la propuesta vigente. `rechazar` lo hace solo el ofertador y cancela la solicitud sin tocar el servicio.
 
+`SolicitudCompraService.retirar(solicitudId, clienteId)` (expuesto como `retirar(solicitudId)` en `SolicitudCompraController`) lo hace solo el cliente mientras la solicitud está en negociación: la deja `CANCELADA`, notifica al ofertador y no modifica el servicio, que sigue disponible.
+
+`SolicitudCompraService.cerrarInactivas(ahora)` cancela las solicitudes en negociación cuya última propuesta sea del cliente y lleven siete días sin actividad, y notifica al cliente; la ejecuta cada hora la tarea programada `CierrePorInactividad`. Si la última propuesta es del ofertador, no se cierra automáticamente.
+
+Los cierres sin acuerdo (rechazo del ofertador, retiro del cliente y cierre por inactividad) comparten el tipo de notificación `SOLICITUD_RECHAZADA`; el motivo se distingue en el mensaje.
+
 ## Persistencia
 
 Basado en el [esquema, E3 p. 13](diagramas/persistencia.png). Todas las tablas tienen `id integer` como clave primaria. `NN` significa NOT NULL. `usuario`, `perfil`, `categoria`, `servicio`, `conversacion` y `mensaje` reflejan las decisiones de implementación descritas abajo; las demás tablas transcriben la imagen sin inferir restricciones adicionales.
@@ -137,6 +143,7 @@ Los campos académicos y de servicios del formulario de [CU-04](requisitos.md#cu
 
 En `servicio`, la tarifa se guarda en pesos colombianos enteros, sin decimales, porque SQLite almacena `decimal` como número de punto flotante; `propuesta` usa la misma unidad. La intensidad horaria son horas por semana, entre 1 y 168. `titulo` se agregó al esquema original para listados y búsqueda. La imagen marcaba sin NN la descripción y la intensidad, obligatorias en CU-02. El esquema original llamaba `ofertante_id` a la columna del ofertador. SQLite no tiene tipos enumerados, así que `estado` es texto con un `CHECK` de los valores de `EstadoServicio`, y `horarios_disponibilidad` usa el mismo formato JSON que `perfil`. Las categorías son una lista fija creada por la migración hasta que exista un rol de administrador que las gestione.
 
-El chat no aparece en E3. Una conversación es única por servicio y cliente: el ofertador es el del servicio, así que no se guarda aparte. La conversación se crea al enviar el primer mensaje. Cada mensaje guarda su autor y su fecha, tiene máximo 1000 caracteres y no se edita ni se borra, para conservarlo como posible evidencia de una denuncia futura.
 
+El chat no aparece en E3. Una conversación es única por servicio y cliente: el ofertador es el del servicio, así que no se guarda aparte. La conversación se crea al enviar el primer mensaje. Cada mensaje guarda su autor y su fecha, tiene máximo 1000 caracteres y no se edita ni se borra, para conservarlo como posible evidencia de una denuncia futura.
 El esquema cubre principalmente compra y publicación. Falta representar el grupo de solicitudes competidoras, fecha límite, horarios acordados y acuerdo aceptado explícito, además de persistencia para reseñas, denuncias y guardados. Completar esas estructuras para cumplir los casos de uso.
+
